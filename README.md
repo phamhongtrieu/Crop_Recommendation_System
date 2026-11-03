@@ -32,3 +32,23 @@ uvicorn app:app --reload --port 8000
 cd frontend
 streamlit run app.py
 ```
+
+## Tiền xử lý dữ liệu
+
+Chạy từ thư mục gốc nếu cần tải dataset vào `data/raw/`:
+
+```bash
+python -m src.download_data
+```
+
+Mở `notebooks/02_data_preprocessing.ipynb` và chạy các cell theo thứ tự. Notebook
+gọi các hàm dùng chung trong `src/preprocessing.py`:
+
+- `clean_data(df)`: làm sạch và kiểm tra các giá trị hợp lệ.
+- `split_data(X, y, test_size=0.2, random_state=42)`: chia train/test có phân tầng theo nhãn.
+- `scale_features(X_train, X_test)`: trả về train/test đã chuẩn hóa và scaler chỉ fit trên train.
+
+Notebook lưu dữ liệu vào `data/processed/` và scaler vào `models/scaler.pkl`.
+Khi dự đoán, dùng scaler đã lưu để `transform` dữ liệu đầu vào.
+Nếu chạy cross-validation, dùng dữ liệu chưa chuẩn hóa và đặt `StandardScaler`
+trong `Pipeline` cùng mô hình để fit riêng trong từng fold.
