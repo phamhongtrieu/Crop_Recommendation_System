@@ -1,70 +1,33 @@
-# =============================================================================
-# Python & Environment
-# =============================================================================
+
+# Python cache
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+.pytest_cache/
 
-# Virtual Environments
+# Virtual environments
 .venv/
 venv/
 env/
-ENV/
-env.bak/
-venv.bak/
 
-# =============================================================================
-# Jupyter Notebooks
-# =============================================================================
-.ipynb_checkpoints
-*/.ipynb_checkpoints/*
+# Jupyter cache
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
 
-# =============================================================================
-# Data & Datasets (Bỏ qua dữ liệu thô/lớn, giữ lại .gitkeep)
-# =============================================================================
-data/raw/*
-!data/raw/.gitkeep
-data/processed/*
-!data/processed/.gitkeep
-
-# =============================================================================
-# Machine Learning Model Artifacts
-# =============================================================================
-models/*
-!models/.gitkeep
-*.pkl
-*.joblib
-*.h5
-*.onnx
-
-# =============================================================================
-# Environment Secrets & Logs
-# =============================================================================
+# Environment secrets
 .env
-.env.local
-*.log
+.env.*
+!.env.example
 
-# =============================================================================
-# IDE & System Files
-# =============================================================================
+# IDE and system files
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
+
+# Build files
+build/
+dist/
+*.egg-info/
