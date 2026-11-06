@@ -13,6 +13,17 @@ env/
 .ipynb_checkpoints/
 */.ipynb_checkpoints/
 
+# Generated datasets
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Generated model artifacts
+models/*
+!models/.gitkeep
+notebooks/*.joblib
+
 # Environment secrets
 .env
 .env.*
