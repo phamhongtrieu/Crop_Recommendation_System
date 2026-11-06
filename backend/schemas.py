@@ -15,8 +15,14 @@ class CropInput(BaseModel):
     rainfall: float = Field(ge=0)
 
 
+class CropProbability(BaseModel):
+    crop: str = Field(min_length=1)
+    probability: float = Field(ge=0, le=1, allow_inf_nan=False)
+
+
 class CropResponse(BaseModel):
     recommended_crop: str = Field(min_length=1)
+    top_3: list[CropProbability] = Field(min_length=1, max_length=3)
 
 
 class HealthResponse(BaseModel):
