@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "model_file": "crop_model.joblib",
+  "model_name": "Naive Bayes",
+  "estimator": "GaussianNB",
+  "configuration": "GridSearch",
+  "parameters": {
+    "model__var_smoothing": 1e-12
+  },
+  "preprocessing": "Dữ liệu gốc",
+  "input_format": "Unscaled feature values in the order listed in features",
+  "features": [
+    "N",
+    "P",
+    "K",
+    "temperature",
+    "humidity",
+    "ph",
+    "rainfall"
+  ],
+  "classes": [
+    "apple",
+    "banana",
+    "blackgram",
+    "chickpea",
+    "coconut",
+    "coffee",
+    "cotton",
+    "grapes",
+    "jute",
+    "kidneybeans",
+    "lentil",
+    "maize",
+    "mango",
+    "mothbeans",
+    "mungbean",
+    "muskmelon",
+    "orange",
+    "papaya",
+    "pigeonpeas",
+    "pomegranate",
+    "rice",
+    "watermelon"
+  ],
+  "selection_metric": "CV_f1_macro_mean",
+  "cv_f1_macro_mean": 0.9948713284300658,
+  "cv_f1_macro_std": 0.004192097445921013,
+  "test_metrics": {
+    "accuracy": 0.9954545454545455,
+    "precision_macro": 0.9958677685950413,
+    "recall_macro": 0.9954545454545454,
+    "f1_macro": 0.9954431533378901
+  },
+  "train_samples": 1760,
+  "test_samples": 440,
+  "cv_method": "StratifiedKFold(shuffle=True, random_state=42)",
+  "n_splits": 5,
+  "training_run_id": "fb7e2bfe101c4ed999bc681c47f317a4",
+  "training_finished_at": "2026-11-06T14:45:16+07:00",
+  "data_hashes": {
+    "X_train.csv": "22c5767cb9ea46bfb6ef71aade32594bd886a7c6e8fbc2c6c752028bdda3534e",
+    "y_train.csv": "dac84f99bd4612ab5b12cb7b1ea429664ccd2a55537dce24ea46292bdda1cf2b",
+    "X_test.csv": "56c2b08e2744d6fd0c79f4309f706b6c8496f59d901cd1b5022b42eacf292c9f",
+    "y_test.csv": "3f3b00d050f08d89e80e71a0ae2fe670d94fa2c043161350fcd5f7231949a33a"
+  },
+  "versions": {
+    "Python": "3.12.9",
+    "scikit-learn": "1.9.0",
+    "numpy": "2.5.2",
+    "pandas": "3.0.5",
+    "joblib": "1.5.3"
+  }
+}
