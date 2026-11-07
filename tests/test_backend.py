@@ -32,8 +32,10 @@ def client(loader):
 
 
 def model_returning(labels):
-    model = Mock(spec=["predict"])
+    model = Mock(spec=["predict", "predict_proba", "classes_"])
     model.predict.return_value = labels
+    model.classes_ = np.array(["rice", "maize", "jute"])
+    model.predict_proba.return_value = np.array([[0.8, 0.15, 0.05]])
     return model
 
 
@@ -79,8 +81,36 @@ def test_malformed_json(client):
 @pytest.mark.parametrize("humidity,ph", [(0, 0), (100, 14)])
 def test_inclusive_bounds(client, humidity, ph):
     payload = {**SAMPLE, "N": 0, "P": 0, "K": 0, "rainfall": 0,
-               "temperature": -10, "humidity": humidity, "ph": ph}
+               "temperature": 0, "humidity": humidity, "ph": ph}
     assert client.post("/predict", json=payload).status_code == 503
+
+
+DEMO_LIMITS = {"N": (0, 140), "P": (0, 145), "K": (0, 205),
+               "temperature": (0, 50), "humidity": (0, 100), "ph": (0, 14), "rainfall": (0, 300)}
+
+
+@pytest.mark.parametrize("field", DEMO_LIMITS)
+@pytest.mark.parametrize("position", ["lower", "middle", "upper"])
+def test_demo_range_accepted_without_changing_input(loader, field, position):
+    lower, upper = DEMO_LIMITS[field]
+    value = {"lower": lower, "middle": (lower + upper) / 2, "upper": upper}[position]
+    model = model_returning(["rice"])
+    loader.side_effect = None
+    loader.return_value = model
+    with TestClient(create_app()) as client:
+        response = client.post("/predict", json={**SAMPLE, field: value})
+        assert response.status_code == 200
+        assert model.predict.call_args.args[0].iloc[0][field] == value
+
+
+@pytest.mark.parametrize("field", DEMO_LIMITS)
+@pytest.mark.parametrize("side", ["below", "above"])
+def test_outside_demo_range_returns_422(client, field, side):
+    lower, upper = DEMO_LIMITS[field]
+    value = lower - 0.01 if side == "below" else upper + 0.01
+    response = client.post("/predict", json={**SAMPLE, field: value})
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["loc"] == ["body", field]
 
 
 def test_prediction_feature_order_and_single_load(loader):
@@ -93,11 +123,18 @@ def test_prediction_feature_order_and_single_load(loader):
         for _ in range(2):
             response = client.post("/predict", json=dict(reversed(list(SAMPLE.items()))))
             assert response.status_code == 200
-            assert response.json() == {"recommended_crop": "rice"}
+            assert response.json() == {
+                "recommended_crop": "rice", "top_3": [
+                    {"crop": "rice", "probability": 0.8},
+                    {"crop": "maize", "probability": 0.15},
+                    {"crop": "jute", "probability": 0.05},
+                ],
+            }
         frame = model.predict.call_args.args[0]
         assert list(frame.columns) == list(FEATURE_NAMES)
         assert frame.shape == (1, 7)
         assert frame.iloc[0].tolist() == [SAMPLE[name] for name in FEATURE_NAMES]
+        assert model.predict_proba.call_args.args[0].equals(frame)
     loader.assert_called_once()
 
 
@@ -110,14 +147,22 @@ def test_pipeline_handles_its_own_preprocessing(loader):
             self.received_frame = X
             return ["maize"]
 
+        def predict_proba(self, X):
+            self.probability_frame = X
+            return [[1.0]]
+
     estimator = StubClassifier()
     estimator.fitted_ = True
+    estimator.classes_ = np.array(["maize"])
     transform = FunctionTransformer(lambda frame: frame * 2)
     loader.side_effect = None
     loader.return_value = Pipeline([("transform", transform), ("classifier", estimator)])
     with TestClient(create_app()) as client:
-        assert client.post("/predict", json=SAMPLE).json() == {"recommended_crop": "maize"}
+        assert client.post("/predict", json=SAMPLE).json() == {
+            "recommended_crop": "maize", "top_3": [{"crop": "maize", "probability": 1.0}],
+        }
     assert estimator.received_frame.iloc[0].tolist() == [2 * SAMPLE[n] for n in FEATURE_NAMES]
+    assert estimator.probability_frame.equals(estimator.received_frame)
 
 
 def test_prediction_error_does_not_expose_details(loader):
@@ -139,6 +184,81 @@ def test_invalid_model_output(loader, labels):
         assert client.post("/predict", json=SAMPLE).status_code == 500
 
 
+@pytest.mark.parametrize("classes,probabilities,label,expected", [
+    (["jute", "rice", "maize", "coffee"], [[0.1, 0.123456789012345, 0.7, 0.076543210987655]],
+     "maize", [("maize", 0.7), ("rice", 0.123456789012345), ("jute", 0.1)]),
+    # A tied top probability must not overwrite the independent predict() result.
+    (["jute", "rice", "maize"], [[0.5, 0.5, 0.0]],
+     "rice", [("jute", 0.5), ("rice", 0.5), ("maize", 0.0)]),
+    (["rice", "maize"], [[0.0, 1.0]], "maize", [("maize", 1.0), ("rice", 0.0)]),
+    (["rice"], [[1.0]], "rice", [("rice", 1.0)]),
+])
+def test_top_three_mapping_sorting_ties_and_precision(loader, classes, probabilities, label, expected):
+    model = model_returning([label])
+    model.classes_ = np.array(classes)
+    model.predict_proba.return_value = probabilities
+    loader.side_effect = None
+    loader.return_value = model
+    with TestClient(create_app()) as client:
+        response = client.post("/predict", json=SAMPLE)
+        assert response.status_code == 200
+        result = response.json()
+        assert result["recommended_crop"] == label
+        assert result["top_3"] == [{"crop": crop, "probability": p} for crop, p in expected]
+
+
+@pytest.mark.parametrize("probabilities", [
+    [[float("nan"), 0.5, 0.5]], [[float("inf"), 0.0, 0.0]],
+    [[float("-inf"), 0.5, 0.5]], [[-0.01, 0.51, 0.5]], [[1.01, 0.0, 0.0]],
+    [[0.5, 0.5]], [[0.25, 0.25, 0.25, 0.25]], [], [0.8, 0.15, 0.05],
+    [[0.8, 0.15, 0.05], [0.8, 0.15, 0.05]], [[[0.8, 0.15, 0.05]]],
+    [["0.8", "0.15", "0.05"]], [[True, False, False]], [[None, 0.5, 0.5]],
+])
+def test_invalid_probabilities_return_safe_500(loader, probabilities):
+    model = model_returning(["rice"])
+    model.predict_proba.return_value = probabilities
+    loader.side_effect = None
+    loader.return_value = model
+    with TestClient(create_app()) as client:
+        response = client.post("/predict", json=SAMPLE)
+        assert response.status_code == 500
+        assert response.json() == {"detail": "Internal prediction error."}
+
+
+@pytest.mark.parametrize("classes", [[], [["rice", "maize", "jute"]],
+                                       ["rice", "rice", "jute"], ["rice", "", "jute"],
+                                       ["rice", 1, "jute"], ["apple", "maize", "jute"]])
+def test_invalid_probability_labels_return_safe_500(loader, classes):
+    model = model_returning(["rice"])
+    model.classes_ = classes
+    loader.side_effect = None
+    loader.return_value = model
+    with TestClient(create_app()) as client:
+        response = client.post("/predict", json=SAMPLE)
+        assert response.status_code == 500
+        assert response.json() == {"detail": "Internal prediction error."}
+
+
+def test_probability_failure_does_not_expose_details(loader):
+    model = model_returning(["rice"])
+    model.predict_proba.side_effect = RuntimeError("private probability failure")
+    loader.side_effect = None
+    loader.return_value = model
+    with TestClient(create_app()) as client:
+        response = client.post("/predict", json=SAMPLE)
+        assert response.status_code == 500
+        assert response.json() == {"detail": "Internal prediction error."}
+
+
+def test_model_without_predict_proba_is_unavailable(loader):
+    model = Mock(spec=["predict"])
+    loader.side_effect = None
+    loader.return_value = model
+    with TestClient(create_app()) as client:
+        assert client.get("/health").json()["model_loaded"] is False
+        assert client.post("/predict", json=SAMPLE).status_code == 503
+
+
 @pytest.mark.parametrize("artifact", [object(), "corrupt", "wrong_columns", "wrong_count"])
 def test_bad_artifact_does_not_prevent_startup(loader, artifact):
     loader.side_effect = None
@@ -158,7 +278,7 @@ def test_bad_artifact_does_not_prevent_startup(loader, artifact):
 
 def test_model_path_independent_of_working_directory(loader, monkeypatch):
     original_directory = Path.cwd()
-    expected_path = Path(__file__).resolve().parents[1] / "models" / "crop_model.pkl"
+    expected_path = Path(__file__).resolve().parents[1] / "models" / "crop_model.joblib"
     # Avoid pytest's shared %TEMP%/pytest-of-Admin, which may belong to a
     # different Windows account when IDE and sandbox use the same TEMP path.
     with TemporaryDirectory(prefix="model-path-", dir=Path(__file__).resolve().parent) as directory:
