@@ -18,7 +18,8 @@ backend/
 tests/
   test_backend.py           # TestClient và mô hình mock trong bộ nhớ
 models/
-  crop_model.joblib         # Pipeline do src/export_model.py xuất
+  crop_model.joblib         # Pipeline GaussianNB của nhóm ML
+  model_metadata.json       # Hợp đồng đầu vào và phiên bản lúc export
 ```
 
 ## Cài đặt và chạy trên Windows
@@ -113,7 +114,8 @@ Chạy từ thư mục gốc:
 .\.venv\Scripts\python.exe -m pytest tests/test_backend.py -q
 ```
 
-Các test thay `joblib.load` bằng mock, không tạo file model, không dùng artifact thật
+Các test trong `test_backend.py` thay `joblib.load` bằng mock, không tạo artifact,
+không dùng artifact thật
 và chạy được khi thư mục models trống. Test kiểm tra endpoint, validation, biên,
 NaN/Infinity, lỗi nội bộ, CORS, Swagger/OpenAPI, số lần nạp, đường dẫn độc lập
 thư mục hiện hành, thứ tự đặc trưng và pipeline có bước biến đổi riêng.
@@ -126,7 +128,7 @@ Không cần chạy IDE bằng quyền Administrator hoặc thay đổi ACL thư
 
 ## Hợp đồng bàn giao mô hình với Bảo Kha
 
-1. Bàn giao artifact Joblib đáng tin cậy của nhóm tại `models/crop_model.joblib`.
+1. Artifact Joblib đáng tin cậy của nhóm nằm tại `models/crop_model.joblib`.
    Joblib có thể thực thi mã khi deserialize: chỉ nạp artifact đã xác nhận nguồn.
 2. Artifact là estimator hoặc một pipeline hoàn chỉnh có `predict(X)`. Backend
    truyền DataFrame pandas một dòng, đúng thứ tự cột:
