@@ -46,12 +46,11 @@ gọi các hàm dùng chung trong `src/preprocessing.py`:
 
 - `clean_data(df)`: làm sạch và kiểm tra các giá trị hợp lệ.
 - `split_data(X, y, test_size=0.2, random_state=42)`: chia train/test có phân tầng theo nhãn.
-- `scale_features(X_train, X_test)`: trả về train/test đã chuẩn hóa và scaler chỉ fit trên train.
 
-Notebook lưu dữ liệu vào `data/processed/` và scaler vào `models/scaler.pkl`.
-Scaler này dùng cho những mô hình cần chuẩn hóa khi làm việc ngoài pipeline.
-Nếu chạy cross-validation, dùng dữ liệu chưa chuẩn hóa và đặt `StandardScaler`
-trong `Pipeline` cùng mô hình để fit riêng trong từng fold.
+Notebook lưu bốn file `X_train.csv`, `X_test.csv`, `y_train.csv` và `y_test.csv`
+vào `data/processed/`, giữ nguyên thang đo của các đặc trưng. Notebook 03 đặt
+`StandardScaler` trong `Pipeline` của SoftMax, KNN và SVM để fit riêng trong
+từng fold khi chạy cross-validation. Các mô hình còn lại dùng dữ liệu gốc.
 
 ## Xuất và kiểm tra model cho backend
 
@@ -92,7 +91,7 @@ probabilities = model.predict_proba(sample)[0]  # Theo thứ tự model.classes_
 ```
 
 Đầu vào luôn là **7 giá trị gốc**, theo đúng thứ tự trên. Pipeline giữ bước tiền xử lý
-của model; Naive Bayes hiện tại không cần chuẩn hóa bằng `scaler.pkl`.
+của model; Naive Bayes hiện tại dùng dữ liệu gốc.
 Model trả trực tiếp tên cây dạng chuỗi.
 
 `src/test_model.py` kiểm tra model đã lưu so với checkpoint, thứ tự đặc trưng,
