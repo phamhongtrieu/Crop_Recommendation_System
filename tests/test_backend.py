@@ -158,7 +158,7 @@ def test_bad_artifact_does_not_prevent_startup(loader, artifact):
 
 def test_model_path_independent_of_working_directory(loader, monkeypatch):
     original_directory = Path.cwd()
-    expected_path = Path(__file__).resolve().parents[1] / "models" / "crop_model.pkl"
+    expected_path = Path(__file__).resolve().parents[1] / "models" / "crop_model.joblib"
     # Avoid pytest's shared %TEMP%/pytest-of-Admin, which may belong to a
     # different Windows account when IDE and sandbox use the same TEMP path.
     with TemporaryDirectory(prefix="model-path-", dir=Path(__file__).resolve().parent) as directory:

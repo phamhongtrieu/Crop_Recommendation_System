@@ -10,7 +10,7 @@ from backend.schemas import CropInput
 
 logger = logging.getLogger(__name__)
 FEATURE_NAMES = ("N", "P", "K", "temperature", "humidity", "ph", "rainfall")
-MODEL_PATH = Path(__file__).resolve().parents[1] / "models" / "crop_model.pkl"
+MODEL_PATH = Path(__file__).resolve().parents[1] / "models" / "crop_model.joblib"
 
 
 class ModelUnavailableError(Exception):

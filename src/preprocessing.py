@@ -2,7 +2,6 @@
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 
 
 FEATURE_COLUMNS = (
@@ -53,27 +52,3 @@ def split_data(
         stratify=y,
     )
     return X_train, X_test, y_train, y_test
-
-
-def scale_features(
-    X_train: pd.DataFrame,
-    X_test: pd.DataFrame,
-) -> tuple[pd.DataFrame, pd.DataFrame, StandardScaler]:
-    """Fit StandardScaler trên train, biến đổi test và giữ tên cột cùng chỉ mục.
-
-    Trả về (X_train_scaled, X_test_scaled, scaler). Lưu scaler để dùng
-    transform dữ liệu dự đoán. Nếu chạy cross-validation, dùng StandardScaler
-    trong Pipeline của từng mô hình để scaler được fit riêng trong từng fold.
-    """
-    scaler = StandardScaler()
-    X_train_scaled = pd.DataFrame(
-        scaler.fit_transform(X_train),
-        columns=X_train.columns,
-        index=X_train.index,
-    )
-    X_test_scaled = pd.DataFrame(
-        scaler.transform(X_test),
-        columns=X_test.columns,
-        index=X_test.index,
-    )
-    return X_train_scaled, X_test_scaled, scaler
