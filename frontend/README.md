@@ -15,6 +15,35 @@ từ Backend. Chạy từ thư mục gốc với môi trường đã có depende
 
 Mở <http://localhost:8501>. Backend mặc định là <http://127.0.0.1:8000>.
 
+## Dependencies và môi trường
+
+Xem [README gốc](../README.md) để clone, tạo môi trường mới và cài
+`requirements-artifact.txt` cho cả hệ thống. Không tạo lại hoặc cài đè `.venv`
+đang hoạt động. Terminal Frontend phải kích hoạt cùng môi trường với Backend.
+`frontend/requirements_frontend.txt` khai báo Streamlit và Requests cho giao diện;
+NumPy/pandas là dependency của Streamlit, còn Backend khai báo chúng trực tiếp.
+
+Streamlit được ghim **1.67.0**, là bản đã chạy bộ AppTest hiện có. Mức 1.25 cũ
+không hỗ trợ đủ `st.container(key=..., gap=..., border=...)`. Việc toàn bộ UI/CSS
+và test chạy đúng trên các bản cũ hơn 1.67.0 **CHƯA XÁC MINH**. Không nâng cấp
+thư viện tự động khi khởi động giao diện.
+
+Phạm vi nhập liệu khớp Backend: N 0–140, P 0–145, K 0–205, temperature 0–50 °C,
+humidity 0–100%, ph 0–14, rainfall 0–300 mm; đều gồm hai đầu. Giá trị phải là số
+hữu hạn. Chưa xác minh đơn vị N/P/K và chu kỳ tổng hợp rainfall từ nguồn dataset;
+không mặc định đơn vị hoặc tự đổi giá trị. Đây là phạm vi demo.
+
+Chạy test từ thư mục gốc sau khi cài dependencies đầy đủ:
+
+```powershell
+python -B -m pytest -p no:cacheprovider frontend/test_app.py -q
+```
+
+Các test hiện có kiểm tra random chỉ điền dữ liệu, chặn dự đoán khi nhập sai,
+xóa kết quả cũ khi sửa thông số và xử lý mất kết nối. Cài đặt toàn hệ thống trên
+môi trường sạch theo cấu hình artifact **CHƯA XÁC MINH**; AppTest không thay thế
+kiểm tra trực quan giao diện trong trình duyệt.
+
 ## Hiển thị kết quả
 
 - Thẻ xanh hiển thị tên cây tiếng Việt, tiếng Anh và emoji. Nhãn chưa biết giữ
