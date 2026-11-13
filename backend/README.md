@@ -27,20 +27,31 @@ models/
 
 Mở PowerShell tại thư mục gốc `Crop_Recommendation`:
 
+Hướng dẫn dưới đây dành cho môi trường mới. Nếu đã có `.venv`, không tạo lại
+hoặc cài đè môi trường đang dùng. Xem [README gốc](../README.md) để clone,
+chuẩn bị artifact và kiểm tra trạng thái tái lập. Python mục tiêu của artifact
+là **3.12.9**; `py -3.12 --version` phải được đối chiếu trước khi tạo môi trường.
+
 ```powershell
 # Chỉ tạo môi trường nếu chưa có .venv
-python -m venv .venv
+py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r backend/requirements_backend.txt
+python -m pip install -r requirements-artifact.txt
+python -m pip check
 python -m uvicorn backend.app:app --reload --port 8000
 ```
 
 Nếu PowerShell chặn activation, có thể dùng trực tiếp:
 
 ```powershell
-.\.venv\Scripts\python.exe -m pip install -r backend/requirements_backend.txt
+.\.venv\Scripts\python.exe -m pip install -r requirements-artifact.txt
+.\.venv\Scripts\python.exe -m pip check
 .\.venv\Scripts\python.exe -m uvicorn backend.app:app --reload --port 8000
 ```
+
+`backend/requirements_backend.txt` chỉ khai báo
+API, thư viện ML và test Backend bằng dải phiên bản; nó không ghim phiên bản
+ML theo artifact. Bản cài sạch theo `requirements-artifact.txt` **CHƯA XÁC MINH**.
 
 Swagger UI: <http://127.0.0.1:8000/docs>.
 OpenAPI JSON: <http://127.0.0.1:8000/openapi.json>.
@@ -120,8 +131,11 @@ Quy tắc dữ liệu:
 
 - Bắt buộc đủ 7 trường, tên và chữ hoa/thường như ví dụ. Không nhận trường thừa.
 - Chỉ nhận số JSON (số nguyên hoặc số thực), không nhận chuỗi số, boolean, null.
-- N, P, K, rainfall không âm; humidity từ 0 đến 100; ph từ 0 đến 14, gồm hai đầu.
-- Temperature có thể âm nhưng phải hữu hạn. Mọi trường đều từ chối NaN/Infinity.
+- N từ 0 đến 140; P từ 0 đến 145; K từ 0 đến 205; rainfall từ 0 đến 300 mm.
+- Temperature từ 0 đến 50 °C; humidity từ 0 đến 100%; ph từ 0 đến 14, gồm hai đầu.
+  Đây là phạm vi hỗ trợ demo, khớp Frontend; mọi trường phải hữu hạn và từ chối NaN/Infinity.
+- Chưa xác minh đơn vị N/P/K và chu kỳ tổng hợp rainfall; không suy đoán đơn vị
+  khi nhập số đo thực địa. Backend không chuyển đổi đơn vị.
 - HTTP 422 khi request sai (kể cả khi chưa có mô hình); `detail` chứa vị trí,
   thông báo và loại lỗi, không phản chiếu dữ liệu đầu vào.
 - HTTP 503 khi thiếu hoặc không nạp được mô hình.
@@ -180,7 +194,8 @@ Không cần chạy IDE bằng quyền Administrator hoặc thay đổi ACL thư
    decoder và bổ sung adapter; hiện tại backend từ chối mã số bằng HTTP 500.
 5. Cung cấp phiên bản Python, scikit-learn, pandas, NumPy, Joblib cùng dependency
    và custom transformer cần thiết để tái tạo môi trường khi export. File requirements
-   hiện dùng các giới hạn sẵn có; cần đối chiếu với metadata khi triển khai.
+   dùng chung với README gốc; `requirements-artifact.txt` ghim bốn phiên bản ML
+   theo metadata. Đây chưa phải lockfile toàn bộ dependency gián tiếp.
 6. Xác nhận đơn vị, ý nghĩa và thứ tự 7 đặc trưng, tên nhãn, yêu cầu đầu vào
    DataFrame/array và vài mẫu đầu vào kèm nhãn dự kiến để đối chiếu tích hợp thực tế.
    Nếu chỉ nhận ndarray hoặc dùng transformer riêng, cần điều chỉnh tối thiểu sau
@@ -200,7 +215,9 @@ Joblib 1.5.3. Môi trường đã kiểm tra dùng Python 3.14.5, scikit-learn 1
 NumPy 2.5.4, pandas 3.1.1, Joblib 1.6.0. Nạp và dự đoán mẫu thành công nhưng
 scikit-learn phát `InconsistentVersionWarning` cho GaussianNB và Pipeline.
 Kết quả kiểm thử không bảo đảm tương thích đầy đủ giữa các phiên bản; khi cần
-môi trường khớp bản export, thống nhất với nhóm trước khi thay đổi thư viện.
+môi trường khớp bản export, dùng Python 3.12.9 và `requirements-artifact.txt`
+trong môi trường mới. Việc cài sạch và chạy toàn bộ trên cấu hình này
+**CHƯA XÁC MINH**; metadata không ghi đủ mọi dependency gián tiếp của môi trường train.
 Không tự động cài đặt hoặc thay đổi phiên bản khi chạy API.
 
 Backend không huấn luyện, không tự tạo mô hình và không cung cấp batch prediction.

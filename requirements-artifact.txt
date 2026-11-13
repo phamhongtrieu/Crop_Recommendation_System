@@ -1,0 +1,11 @@
+# Candidate environment for the supplied artifact; use Python 3.12.9.
+# Install into a NEW environment only: pip install -r requirements-artifact.txt
+# Clean installation and the combined Python 3.12 environment are UNVERIFIED.
+# These four pins come from models/model_metadata.json, not the current .venv.
+# Other dependencies remain governed by requirements.txt: this is NOT a full
+# transitive lockfile and does not reproduce unknown training dependencies.
+-r requirements.txt
+scikit-learn==1.9.0
+numpy==2.5.2
+pandas==3.0.5
+joblib==1.5.3
