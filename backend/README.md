@@ -18,8 +18,12 @@ backend/
 tests/
   test_backend.py           # TestClient và mô hình mock trong bộ nhớ
 models/
-  crop_model.joblib         # Pipeline GaussianNB của nhóm ML
-  model_metadata.json       # Hợp đồng đầu vào và phiên bản lúc export
+  softmax/
+    train.py                # GridSearchCV và lưu model tốt nhất
+    evaluate.ipynb          # Đánh giá và xem kết quả từng bước
+    export_excel.py         # Xuất báo cáo Excel chung
+    model.joblib            # Pipeline StandardScaler + Softmax
+    model_metadata.json     # Hợp đồng đầu vào, CV/test và phiên bản thư viện
 ```
 
 ## Cài đặt và chạy trên Windows
@@ -128,7 +132,7 @@ Không cần chạy IDE bằng quyền Administrator hoặc thay đổi ACL thư
 
 ## Hợp đồng bàn giao mô hình với Bảo Kha
 
-1. Artifact Joblib đáng tin cậy của nhóm nằm tại `models/crop_model.joblib`.
+1. Artifact Joblib đáng tin cậy của nhóm nằm tại `models/softmax/model.joblib`.
    Joblib có thể thực thi mã khi deserialize: chỉ nạp artifact đã xác nhận nguồn.
 2. Artifact là estimator hoặc một pipeline hoàn chỉnh có `predict(X)`. Backend
    truyền DataFrame pandas một dòng, đúng thứ tự cột:
@@ -153,6 +157,9 @@ Sau khi đặt artifact, dừng và khởi động lại Uvicorn; chỉ nạp m�
 cũng chỉ thử một lần; đặt file sau đó cần khởi động lại. Kiểm tra `/health`, rồi thử
 `/predict` bằng các mẫu kiểm chứng của nhóm ML.
 
-Hiện chưa thể xác nhận dự đoán thật, độ chính xác, tính tương thích artifact hoặc
-preprocessing thực tế. Backend không huấn luyện, không tự tạo mô hình và không
-cung cấp confidence hoặc batch prediction.
+Pipeline hiện tại gồm StandardScaler và Softmax; tham số được chọn theo CV trên
+train. Chạy `python -m models.softmax.train`, chạy các cell trong `models/softmax/evaluate.ipynb`,
+sau đó chạy `python models/softmax/export_excel.py` để tạo lại model và báo cáo.
+`models/softmax/model_metadata.json` ghi phiên bản
+thư viện, thứ tự đặc trưng, nhãn và các chỉ số đánh giá.
+Backend không huấn luyện và không cung cấp confidence hoặc batch prediction.

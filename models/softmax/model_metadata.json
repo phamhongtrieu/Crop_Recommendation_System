@@ -1,0 +1,66 @@
+{
+  "model_file": "model.joblib",
+  "model_name": "Softmax",
+  "estimator": "LogisticRegression",
+  "configuration": "GridSearch",
+  "parameters": {
+    "model__C": 100.0
+  },
+  "preprocessing": "StandardScaler",
+  "input_format": "Unscaled feature values in the order listed in features",
+  "features": [
+    "N",
+    "P",
+    "K",
+    "temperature",
+    "humidity",
+    "ph",
+    "rainfall"
+  ],
+  "classes": [
+    "apple",
+    "banana",
+    "blackgram",
+    "chickpea",
+    "coconut",
+    "coffee",
+    "cotton",
+    "grapes",
+    "jute",
+    "kidneybeans",
+    "lentil",
+    "maize",
+    "mango",
+    "mothbeans",
+    "mungbean",
+    "muskmelon",
+    "orange",
+    "papaya",
+    "pigeonpeas",
+    "pomegranate",
+    "rice",
+    "watermelon"
+  ],
+  "selection_metric": "CV_f1_macro_mean",
+  "cv_f1_macro_mean": 0.9775813387205055,
+  "cv_f1_macro_std": 0.0058487588325316425,
+  "train_samples": 1760,
+  "test_samples": 440,
+  "n_splits": 5,
+  "cv_method": "StratifiedKFold(n_splits=5, random_state=42, shuffle=True)",
+  "training_finished_at": "2026-11-20T14:56:55+07:00",
+  "versions": {
+    "Python": "3.12.9",
+    "scikit-learn": "1.9.0",
+    "numpy": "2.5.2",
+    "pandas": "3.0.5",
+    "joblib": "1.5.3"
+  },
+  "evaluated_at": "2026-11-20T15:11:27+07:00",
+  "test_metrics": {
+    "accuracy": 0.9840909090909091,
+    "precision_macro": 0.9851966873706004,
+    "recall_macro": 0.9840909090909092,
+    "f1_macro": 0.9840494971805238
+  }
+}
