@@ -51,7 +51,7 @@ src/
   test_model.py                      # Kiểm tra Softmax, checkpoint và Excel
 backend/                            # REST API FastAPI
 frontend/                           # Giao diện Streamlit
-tests/                              # Kiểm tra Backend và Decision Tree
+tests/                              # Kiểm tra Backend
 ```
 
 ## Cài đặt
@@ -210,7 +210,7 @@ Lưới tham số hiện tại gồm **16 tổ hợp**:
 ```python
 param_grid = {
     "criterion": ["gini", "entropy"],
-    "max_depth": [8, None],
+    "max_depth": [8, 12],
     "min_samples_split": [2, 10],
     "min_samples_leaf": [1, 3],
     "ccp_alpha": [0.0],
@@ -265,11 +265,11 @@ Các chỉ số dưới đây lấy từ `model_metadata.json` của từng thu�
 | Mô hình | CV F1-macro | Test Accuracy | Test F1-macro |
 | --- | ---: | ---: | ---: |
 | Softmax | 97,76% | 98,41% | 98,40% |
-| Decision Tree | 98,52% | 97,95% | 97,94% |
+| Decision Tree | 98,47% | 97,95% | 97,94% |
 
 Softmax được chọn với `C=100`. Decision Tree được chọn với `criterion="gini"`,
-`max_depth=None`, `min_samples_split=2`, `min_samples_leaf=1`, `ccp_alpha=0.0`;
-cây đã fit có độ sâu 17, 38 lá và 75 nút.
+`max_depth=12`, `min_samples_split=2`, `min_samples_leaf=1`, `ccp_alpha=0.0`;
+cây đã fit có độ sâu 12, 32 lá và 63 nút.
 Điểm CV là điểm dùng trong tìm siêu tham số; điểm test là đánh giá holdout.
 
 ## Kiểm thử
@@ -280,13 +280,12 @@ Chạy toàn bộ kiểm thử Backend, Frontend và model:
 python -m pytest tests frontend/test_app.py src/test_model.py -q
 ```
 
-Chỉ kiểm tra model, checkpoint, đánh giá và Excel:
+Chỉ kiểm tra Softmax, checkpoint và Excel:
 
 ```powershell
-python -m pytest tests/test_decision_tree.py src/test_model.py -q
+python -m pytest src/test_model.py -q
 ```
 
-Các kiểm thử model cần có model, checkpoint, metadata, CSV processed và báo cáo
-Excel tương ứng. `src/test_model.py` kiểm tra Softmax;
-`tests/test_decision_tree.py` kiểm tra Decision Tree, lưới tham số, cây đã lưu,
-điểm test, hình cây và các bảng Excel. Kiểm thử không ghi đè các artifact đã lưu.
+Các kiểm thử Softmax cần có model, checkpoint, metadata, CSV processed và báo cáo
+Excel tương ứng. `src/test_model.py` đối chiếu model đã lưu với checkpoint,
+kiểm tra điểm test, xác suất và các bảng Excel. Kiểm thử không ghi đè các artifact đã lưu.
