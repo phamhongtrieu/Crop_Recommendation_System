@@ -1,7 +1,8 @@
 # Candidate environment for the supplied artifact; use Python 3.12.9.
 # Install into a NEW environment only: pip install -r requirements-artifact.txt
 # Clean installation and the combined Python 3.12 environment are UNVERIFIED.
-# These four pins come from models/model_metadata.json, not the current .venv.
+# These four pins match models/softmax/model_metadata.json and
+# models/decision_tree/model_metadata.json.
 # Other dependencies remain governed by requirements.txt: this is NOT a full
 # transitive lockfile and does not reproduce unknown training dependencies.
 -r requirements.txt

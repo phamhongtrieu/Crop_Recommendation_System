@@ -7,7 +7,6 @@ from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from models.common import library_versions, read_split, timestamp
 
 # 1. Đọc dữ liệu train.
