@@ -14,7 +14,7 @@ X_train, y_train = read_split("train")
 model = DecisionTreeClassifier(random_state=42)
 param_grid = {
     "criterion": ["gini", "entropy"],
-    "max_depth": [8, None],
+    "max_depth": [8, 12],
     "min_samples_split": [2, 10],
     "min_samples_leaf": [1, 3],
     "ccp_alpha": [0.0],
