@@ -3,215 +3,133 @@
 Đồ án Học máy dự đoán loại cây trồng từ 7 đặc trưng nông nghiệp và khí hậu:
 `N`, `P`, `K`, `temperature`, `humidity`, `ph`, `rainfall`.
 
-<<<<<<< HEAD
+Dataset gồm **2.200 mẫu, 22 loại cây**, mỗi loại 100 mẫu. Dữ liệu được chia có
+phân tầng theo nhãn: **1.760 mẫu train và 440 mẫu test**, `random_state=42`.
+
+Hiện đã huấn luyện **Softmax và Decision Tree**. Các thư mục KNN, Naive Bayes,
+SVM và Random Forest đang để trống. Backend hiện sử dụng **Softmax** tại
+`models/softmax/model.joblib`.
+
 ## Cấu trúc thư mục
 
 ```text
 data/
-  raw/                              # Dataset gốc
+  raw/Crop_recommendation.csv        # Dataset gốc
   processed/                        # X_train, X_test, y_train, y_test (CSV)
 notebooks/
   01_exploratory_data_analysis.ipynb
   02_data_preprocessing.ipynb
 models/
-  __init__.py
-  common.py                         # Đọc dữ liệu và thông tin lần chạy
+  common.py                         # Đọc dữ liệu, thời gian và phiên bản thư viện
   reporting.py                      # Tổng hợp kết quả đánh giá thành Excel
-  model_evaluation_results.xlsx      # Báo cáo chung
+  model_evaluation_results.xlsx     # Báo cáo chung cho các mô hình đã đánh giá
   softmax/
-    train.py                        # GridSearchCV và lưu model tốt nhất
-    evaluate.ipynb                  # Chạy đánh giá và xem kết quả từng bước
-    export_excel.py                 # Xuất kết quả đã đánh giá sang Excel
-    model.joblib                    # Pipeline Softmax được chọn theo CV
-    model_metadata.json             # Đặc trưng, nhãn, tham số, CV/test, phiên bản
-    training_results.joblib         # Đối tượng GridSearch đã fit và thông tin lần train
-    evaluation_results.json         # Hai bảng Tong_hop và GridSearch
-  knn/                              # Trống, chỉ có .gitkeep
-  naive_bayes/                      # Trống, chỉ có .gitkeep
-  svm/                              # Trống, chỉ có .gitkeep
-  decision_tree/                    # Trống, chỉ có .gitkeep
-  random_forest/                    # Trống, chỉ có .gitkeep
+    train.py
+    evaluate.ipynb
+    export_excel.py
+    model.joblib
+    training_results.joblib
+    model_metadata.json
+    evaluation_results.json
+  decision_tree/
+    train.py
+    evaluate.ipynb
+    export_excel.py
+    model.joblib
+    training_results.joblib
+    model_metadata.json
+    evaluation_results.json
+    best_decision_tree.png
+    best_decision_tree.svg
+  knn/                              # Chỉ có .gitkeep
+  naive_bayes/                      # Chỉ có .gitkeep
+  svm/                              # Chỉ có .gitkeep
+  random_forest/                    # Chỉ có .gitkeep
 src/
   preprocessing.py                  # Làm sạch và chia dữ liệu
   download_data.py                   # Tải dataset
-  test_model.py                      # Kiểm tra model, checkpoint và Excel
+  test_model.py                      # Kiểm tra Softmax, checkpoint và Excel
 backend/                            # REST API FastAPI
 frontend/                           # Giao diện Streamlit
-tests/                              # Kiểm tra hợp đồng API
-=======
-Dataset hiện có **2.200 mẫu, 7 đặc trưng và 22 loại cây**, mỗi loại 100 mẫu.
-Train/test có phân tầng theo nhãn, tỷ lệ 80/20: 1.760 mẫu train và 440 mẫu test.
-
-## Cấu trúc Đồ án
-1. **Project 1: Backend RestAPI (`/backend`)**
-   - Xây dựng RestAPI sử dụng FastAPI.
-   - Nhận Input mẫu dạng JSON các chỉ số nông học, trả về kết quả dự đoán loại cây trồng phù hợp nhất.
-2. **Project 2: Frontend UI (`/frontend`)**
-   - Xây dựng giao diện ứng dụng tương tác bằng Streamlit.
-   - Cho phép người dùng nhập dữ liệu hoặc chọn kịch bản để nhận khuyến nghị trực quan.
-3. **Project 3: MLOps & Experimentation (`/notebooks`, `/src`, `/models`)**
-   - Phân tích dữ liệu thăm dò (EDA).
-   - Đã huấn luyện và so sánh 6 thuật toán: SoftMax (LogisticRegression), KNN, GaussianNB, SVM, Decision Tree và Random Forest; mỗi thuật toán có cấu hình mặc định và GridSearch.
-   - Đóng gói và lưu trữ mô hình chuẩn vào thư mục `models/`.
-
-## Hướng dẫn cài đặt và chạy trên Windows
-
-Các lệnh cài đặt dưới đây dành cho **máy/môi trường mới**. Nếu đã có `.venv`
-đang hoạt động, giữ nguyên môi trường đó; không chạy lại lệnh tạo hoặc cài đặt
-để ghi đè nó. Có thể dùng một tên môi trường chưa tồn tại, ví dụ `.venv-artifact`,
-và thay đường dẫn tương ứng trong các lệnh. Hai terminal đều phải đứng tại
-**thư mục gốc project**, nơi có README này, `backend/`, `frontend/` và `models/`.
-
-### 1. Clone repository
-
-```powershell
-git clone https://github.com/phamhongtrieu/Crop_Recommendation_System.git
-cd Crop_Recommendation_System
+tests/                              # Kiểm tra Backend và Decision Tree
 ```
 
-Nếu đã có bản project, mở PowerShell tại thư mục gốc hiện có và bỏ qua bước clone.
+## Cài đặt
 
-### 2. Tạo và kích hoạt môi trường mới
+Chạy các lệnh từ **thư mục gốc dự án**, nơi có README này. Nếu đã có môi trường
+`.venv` đang hoạt động, kích hoạt môi trường đó:
 
-Để khớp phiên bản Python trong metadata, cài **Python 3.12.9** trước.
-`py -3.12` chọn bản Python 3.12 đã cài; kiểm tra phiên bản chính xác bằng lệnh sau:
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Trên máy mới, dùng **Python 3.12.9** để khớp metadata của các mô hình. Chỉ tạo
+môi trường khi đường dẫn `.venv` chưa tồn tại:
 
 ```powershell
 py -3.12 --version
-# Chỉ chạy khi đường dẫn .venv chưa tồn tại.
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python --version
 ```
 
-Nếu PowerShell chặn activation, dùng trực tiếp `.\.venv\Scripts\python.exe`
-thay cho `python` trong các lệnh tiếp theo. Không cần thay đổi policy hệ thống.
-
-### 3. Cài dependencies
-
-Trong môi trường mới, cài cấu hình dành cho artifact được bàn giao:
+Cài dependencies khi thiết lập môi trường:
 
 ```powershell
 python -m pip install -r requirements-artifact.txt
 python -m pip check
 ```
 
-`requirements-artifact.txt` bao gồm `requirements.txt` và ghim bốn thư viện ML
-đúng metadata. `requirements.txt` dùng chung requirements Backend/Frontend,
-bổ sung notebook, Excel (`openpyxl`) và công cụ tải dataset; `pytest` và `httpx`
-được khai báo trong requirements Backend. Đây chưa phải lockfile toàn bộ
-dependency gián tiếp. **Cài đặt sạch và chạy kết hợp trên Python 3.12.9:
-CHƯA XÁC MINH.** Xem phần môi trường bên dưới trước khi bàn giao.
+Nếu PowerShell chặn activation, thay `python` bằng `.\.venv\Scripts\python.exe`
+trong các lệnh. Linux/macOS dùng `source .venv/bin/activate`.
 
-### 4. Kiểm tra artifact
+Các phiên bản được ghi trong metadata của cả hai mô hình:
 
-```powershell
-Test-Path models/crop_model.joblib
-Test-Path models/model_metadata.json
-```
+| Thành phần | Phiên bản |
+| --- | --- |
+| Python | 3.12.9 |
+| scikit-learn | 1.9.0 |
+| NumPy | 2.5.2 |
+| pandas | 3.0.5 |
+| Joblib | 1.5.3 |
 
-Cả hai phải trả `True`. Trong checkout được kiểm tra, model, metadata, dataset,
-bốn CSV processed và checkpoint `notebooks/model_training_results.joblib`
-đều được Git theo dõi. `.gitignore` hiện tại không bỏ qua các artifact này.
-Chưa xác minh lại bằng một bản clone từ remote trên máy sạch.
+`requirements-artifact.txt` ghim bốn thư viện ML trên và bao gồm
+`requirements.txt`. File requirements chung dùng dependencies Backend/Frontend,
+đồng thời bổ sung notebook, biểu đồ, Excel và công cụ tải dataset. Đây chưa phải
+lockfile đầy đủ; quy trình cài mới toàn bộ môi trường chưa được xác minh.
 
-Nếu bản bàn giao thiếu artifact, ưu tiên nhận **cặp model/metadata cùng lần
-export** từ nhóm và đặt đúng đường dẫn. Chỉ nạp artifact đáng tin cậy.
-Không cần huấn luyện hoặc export lại để demo khi artifact đã đủ.
-Nếu cần tái tạo, xem quy trình ở phần tiền xử lý/xuất model; các bước đó có ghi
-file và chỉ thực hiện khi chủ động muốn tạo lại artifact.
+## Chạy ứng dụng
 
-### 5. Chạy Backend — terminal 1
+Backend nạp `models/softmax/model.joblib` một lần khi khởi động. Nếu dùng model
+được bàn giao, có thể chạy ứng dụng ngay mà không cần train lại.
 
-Từ thư mục gốc, với môi trường đã kích hoạt:
+Terminal 1, tại thư mục gốc và trong môi trường đã kích hoạt:
 
 ```powershell
 python -m uvicorn backend.app:app --reload --port 8000
 ```
 
-### 6. Kiểm tra Backend
-
-Mở <http://127.0.0.1:8000/health> và <http://127.0.0.1:8000/docs>.
-Khi model nạp được, `/health` trả:
-
-```json
-{"status":"ok","model_loaded":true}
-```
-
-Nếu model thiếu/hỏng, `/health` vẫn có thể trả HTTP 200 với `model_loaded:false`;
-request hợp lệ tới `/predict` trả 503. Đặt lại artifact rồi khởi động lại Backend.
-
-### 7. Chạy Frontend — terminal 2
-
-Mở terminal khác tại **cùng thư mục gốc**, kích hoạt cùng môi trường:
+Terminal 2, tại cùng thư mục gốc:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 python -m streamlit run frontend/app.py
 ```
 
-### 8. Mở giao diện và thử dự đoán
+- Giao diện: <http://localhost:8501>.
+- Tài liệu API: <http://127.0.0.1:8000/docs>.
+- Trạng thái model: <http://127.0.0.1:8000/health>.
 
-Mở <http://localhost:8501>. URL Backend mặc định là `http://127.0.0.1:8000`.
-Nhấn Random chỉ điền dữ liệu; nhấn Dự đoán mới gửi `POST /predict`.
-Mẫu tham chiếu ở phần model bên dưới cho kết quả `rice`, Top 3 lần lượt là
-`rice`, `jute`, `coffee` với artifact hiện tại.
+Khi model nạp được, `/health` trả `{"status":"ok","model_loaded":true}`.
+Nếu model thiếu hoặc không nạp được, `model_loaded` là `false` và `/predict`
+trả HTTP 503 với đầu vào hợp lệ. Khởi động lại Backend sau khi thay model.
 
-### 9. Chạy kiểm thử
+URL Backend mặc định trên Frontend là `http://127.0.0.1:8000`. Nút Random chỉ
+điền dữ liệu mẫu; nhấn **Dự đoán** để gửi yêu cầu tới API.
 
-Từ thư mục gốc, trong terminal đã kích hoạt môi trường:
+## Đầu vào và kết quả API
 
-```powershell
-$env:PYTHONDONTWRITEBYTECODE = "1"
-python -B -m pytest -p no:cacheprovider tests frontend/test_app.py src/test_model.py -q
-```
-
-Test không huấn luyện hoặc ghi lại model/dataset. Một test đường dẫn tạo thư mục
-tạm mới trong `tests/` và tự dọn thư mục đó. Các test Frontend kiểm tra random
-không tự dự đoán, validation, kết quả cũ và lỗi kết nối. Test model cần đủ CSV
-processed và checkpoint. Kiểm thử riêng: thêm đường dẫn nhóm muốn chạy thay cho
-ba đường dẫn trên. Model thiếu có thể khiến nhóm tích hợp bị skip; cần xem cả
-số pass/fail/skip, không chỉ mã thoát.
-
-## Môi trường và khả năng tái lập
-
-| Thành phần | Lúc xuất model (metadata) | Môi trường đã kiểm tra |
-| --- | --- | --- |
-| Python | 3.12.9 | 3.14.5 |
-| scikit-learn | 1.9.0 | 1.9.1 |
-| NumPy | 2.5.2 | 2.5.4 |
-| pandas | 3.0.5 | 3.1.1 |
-| Joblib | 1.5.3 | 1.6.0 |
-
-`requirements-artifact.txt` ghi lại bốn phiên bản thư viện ở cột metadata;
-Python 3.12.9 phải được cài riêng. Metadata không ghi đủ mọi dependency gián tiếp
-(ví dụ SciPy), nên chưa thể khẳng định tái tạo chính xác toàn bộ môi trường train.
-Các dải phiên bản trong `requirements.txt` dành cho phát triển; nếu cài riêng file
-đó, pip có thể chọn phiên bản khác artifact.
-
-Môi trường kiểm tra dùng FastAPI 0.162.0, Pydantic 2.14.3, Uvicorn 0.54.0,
-Streamlit 1.67.0, pytest 9.2.0 và httpx 0.28.1. Nạp model/dự đoán được nhưng còn
-`InconsistentVersionWarning` do khác scikit-learn; đây không phải bằng chứng
-tương thích đầy đủ. Không cài lại thư viện chỉ để tắt warning. scikit-learn
-[không bảo đảm nạp model giữa các phiên bản khác nhau](https://scikit-learn.org/stable/model_persistence.html).
-
-Frontend ghim Streamlit 1.67.0 theo bản đã chạy AppTest/widget/CSS. Mức cũ 1.25
-không đủ cho `st.container(key=..., gap=..., border=...)`.
-[Tài liệu 1.48](https://docs.streamlit.io/1.48.0/develop/api-reference/layout/st.container)
-đã có các tham số container này, nhưng toàn bộ test/CSS chưa được kiểm chứng trên
-mọi bản cũ hơn 1.67.0. Vì vậy đây là bản ghim đã kiểm thử, không phải khẳng định
-1.67.0 là bản đầu tiên hỗ trợ các API đó.
-
-Trước khi xác nhận bàn giao môi trường sạch: cài vào môi trường mới, chạy
-`python -m pip check`, bộ test, `/health`, mẫu `rice` và kiểm tra giao diện trong
-trình duyệt. Các gói notebook chưa được cài/kiểm thử trong `.venv` hiện tại;
-đặc biệt `openpyxl` còn thiếu. Không có cài đặt/nâng cấp môi trường trong lần
-cập nhật tài liệu này.
-
-## Hợp đồng đầu vào API
-
-`POST /predict` nhận đúng bảy trường số JSON, không nhận trường thừa, chuỗi số,
-boolean, null, NaN hoặc Infinity. Hai đầu khoảng đều được chấp nhận:
+`POST /predict` nhận đúng bảy trường số JSON sau. Hai đầu khoảng đều được chấp
+nhận; trường thừa, chuỗi số, boolean, null, NaN và Infinity bị từ chối với HTTP 422.
 
 | Trường | Phạm vi demo |
 | --- | --- |
@@ -223,12 +141,10 @@ boolean, null, NaN hoặc Infinity. Hai đầu khoảng đều được chấp n
 | ph | 0–14 |
 | rainfall | 0–300 mm |
 
-Đây là phạm vi hỗ trợ demo, không phải giới hạn vật lý tuyệt đối. Chưa xác minh
-đơn vị N/P/K và chu kỳ tổng hợp rainfall từ nguồn dataset; không mặc định chúng
-là kg/ha hoặc lượng mưa theo tháng/năm. Frontend gửi nguyên giá trị, không đổi
-đơn vị. Dữ liệu không hợp lệ trả HTTP 422.
+Đây là phạm vi hỗ trợ demo. Đơn vị N/P/K và chu kỳ tổng hợp rainfall chưa được
+xác minh từ nguồn dataset; Frontend gửi nguyên giá trị đầu vào.
 
-Ví dụ gọi API từ PowerShell:
+Ví dụ gọi API bằng PowerShell, sau khi Backend đã chạy:
 
 ```powershell
 $body = @{
@@ -236,157 +152,141 @@ $body = @{
     humidity = 82.00274423; ph = 6.502985292; rainfall = 202.9355362
 } | ConvertTo-Json
 Invoke-RestMethod -Uri http://127.0.0.1:8000/predict -Method Post -ContentType application/json -Body $body
->>>>>>> origin/main
 ```
 
-Hiện chỉ triển khai và huấn luyện **Softmax**. Các thuật toán khác giữ trống
-cho đến khi có quyết định tiếp theo. `notebooks/` chỉ còn EDA và tiền xử lý;
-mã train, đánh giá và kết quả nằm trong `models/`.
-
-<<<<<<< HEAD
-## Cài đặt
-=======
-Quy trình tùy chọn để tái tạo dữ liệu; các lệnh tải dữ liệu và cell lưu CSV có
-thể ghi đè file hiện có. Bỏ qua nếu dùng dữ liệu/artifact được bàn giao để demo.
-
-Chạy từ thư mục gốc nếu cần tải dataset vào `data/raw/`:
->>>>>>> origin/main
-
-Chạy từ thư mục gốc của dự án:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-```
-
-Linux/macOS dùng `source .venv/bin/activate` để kích hoạt môi trường.
+Mẫu này được Softmax hiện tại dự đoán là `rice`. Kết quả gồm
+`recommended_crop` và `top_3`, mỗi phần tử có `crop` và `probability`.
+Backend truyền dữ liệu gốc vào pipeline Softmax; pipeline tự chuẩn hóa bằng
+StandardScaler. Xác suất Top 3 lấy trực tiếp từ `predict_proba`, không chuẩn hóa
+riêng tổng Top 3 và không phải tỷ lệ đảm bảo cây trồng sẽ phát triển tốt.
 
 ## Chuẩn bị dữ liệu
 
-Nếu chưa có dataset:
+Dữ liệu gốc và bốn CSV processed đã có trong dự án. Nếu cần tải lại dataset:
 
 ```powershell
 python -m src.download_data
 ```
 
-Chạy các cell trong `notebooks/02_data_preprocessing.ipynb` để tạo bốn file
-`X_train.csv`, `X_test.csv`, `y_train.csv`, `y_test.csv` trong `data/processed/`.
-Notebook dùng `clean_data` và `split_data` từ `src/preprocessing.py`, chia có
-phân tầng 80% train / 20% test, `random_state=42`, giữ nguyên thang đo đặc trưng.
+Chạy các cell trong [02_data_preprocessing.ipynb](notebooks/02_data_preprocessing.ipynb)
+để làm sạch và tạo `X_train.csv`, `X_test.csv`, `y_train.csv`, `y_test.csv` trong
+`data/processed/`. Notebook dùng `clean_data` và `split_data` từ
+`src/preprocessing.py`, chia có phân tầng 80/20 và giữ nguyên thang đo đặc trưng.
+Các bước tải lại và lưu CSV có thể ghi đè dữ liệu hiện có.
 
-## Huấn luyện và đánh giá Softmax
+## Huấn luyện và đánh giá
+
+Cả hai thuật toán dùng `StratifiedKFold(n_splits=5, shuffle=True, random_state=42)`
+và GridSearchCV với hai chỉ số Accuracy, F1-macro. Siêu tham số được chọn theo
+**F1-macro validation trung bình** (`refit="f1_macro"`), sau đó mô hình tốt nhất
+được fit lại trên toàn bộ train. Tập test chỉ dùng để đánh giá cuối cùng.
+
+### Softmax
+
+Chạy từ thư mục gốc:
 
 ```powershell
 python -m models.softmax.train
 ```
 
-Mở `models/softmax/evaluate.ipynb`, chọn kernel Python và chạy các cell từ trên
-xuống (Run All). Notebook hiển thị siêu tham số tốt nhất, bảng tổng hợp,
-GridSearch, rồi lưu kết quả JSON và metadata ở cell cuối.
-Sau đó xuất Excel và kiểm tra:
+Script dùng `Pipeline(StandardScaler, LogisticRegression)` với `solver="lbfgs"`,
+`max_iter=5000`, `random_state=42`. StandardScaler được fit riêng trên train của
+từng fold. Lưới tham số: `model__C = [0.001, 0.01, 0.1, 1.0, 10.0, 100.0]`.
 
-<<<<<<< HEAD
+Sau khi train, mở [evaluate.ipynb của Softmax](models/softmax/evaluate.ipynb),
+chọn kernel Python của môi trường dự án và chạy **Run All**. Notebook hiển thị
+siêu tham số tốt nhất, bảng tổng hợp, toàn bộ kết quả GridSearch và lưu JSON cùng
+metadata.
+
+### Decision Tree
+
 ```powershell
-python models/softmax/export_excel.py
-=======
-Chỉ xuất khi cần tái tạo model và đã thống nhất môi trường. Notebook 03 ghi
-checkpoint, notebook 04 ghi Excel, script export ghi đè model và metadata.
-Script export yêu cầu scikit-learn khớp checkpoint (hiện là 1.9.0); không chạy
-export bằng `.venv` kiểm tra đang dùng 1.9.1. Kiểm tra model bằng `src.test_model`
-chỉ đọc artifact, không huấn luyện lại.
-
-Chạy notebook `03_model_training.ipynb` và `04_model_evaluation.ipynb` trước,
-sau đó chạy từ thư mục gốc:
-
-```bash
-python -m src.export_model
->>>>>>> origin/main
-python -m src.test_model
+python -m models.decision_tree.train
 ```
 
-Có thể mở `train.py` hoặc `export_excel.py` và nhấn Run trong VS Code.
-Cách chạy trực tiếp để train: `python models/softmax/train.py`.
+DecisionTreeClassifier dùng `random_state=42` và nhận đặc trưng gốc.
+Lưới tham số hiện tại gồm **16 tổ hợp**:
 
-`train.py` là script chạy tuần tự: đọc dữ liệu → tạo pipeline → GridSearch →
-lưu model và kết quả CV. Phần lập bảng thống kê và metadata nằm trong `evaluate.ipynb`.
-`train.py` và `export_excel.py` không được import nên chạy tuần tự ở cấp file,
-không dùng `if __name__ == "__main__"`.
-Script dùng `Pipeline(StandardScaler, LogisticRegression)` với `solver="lbfgs"`,
-`max_iter=5000`. Với bài toán nhiều lớp, LogisticRegression này dùng Softmax.
-StandardScaler chỉ fit trên train của từng fold, rồi fit trên toàn bộ train
-khi tạo pipeline cuối cùng.
+```python
+param_grid = {
+    "criterion": ["gini", "entropy"],
+    "max_depth": [8, None],
+    "min_samples_split": [2, 10],
+    "min_samples_leaf": [1, 3],
+    "ccp_alpha": [0.0],
+}
+```
 
-GridSearch dùng `StratifiedKFold(n_splits=5, shuffle=True, random_state=42)` với
-`C = [0.001, 0.01, 0.1, 1, 10, 100]`. Chọn C bằng F1-macro validation trung bình;
-`model.joblib` lưu pipeline GridSearch đã fit. Tập test không dùng để fit hay
-tìm tham số. Checkpoint lưu đối tượng GridSearch, gồm model tốt nhất và kết quả CV.
+Sau khi train, chạy **Run All** trong
+[evaluate.ipynb của Decision Tree](models/decision_tree/evaluate.ipynb).
+Phần 6 vẽ toàn bộ cây có siêu tham số tốt nhất và lưu
+[PNG](models/decision_tree/best_decision_tree.png) cùng
+[SVG](models/decision_tree/best_decision_tree.svg). Mở SVG để phóng to từng nút.
 
-Cột `Best_grid_parameters` chỉ ghi siêu tham số tốt nhất từ `search.best_params_`.
-`Tong_hop` chỉ giữ kết quả của model được chọn. Bảng `GridSearch` trong notebook,
-JSON và Excel lưu tất cả cấu hình đã thử, điểm CV, độ lệch chuẩn và thứ hạng.
-Cột `Selected=True` đánh dấu cấu hình được chọn; toàn bộ đối tượng tìm kiếm được lưu trong checkpoint.
+### Các file kết quả và báo cáo Excel
 
-`evaluate.ipynb` gồm các cell tuần tự: đọc model và dữ liệu → xem thông số →
-tính chỉ số đánh giá → xem GridSearch → lưu JSON.
-Notebook chỉ tính các chỉ số CV/train/test cho `Tong_hop` và kết quả tìm tham số
-cho `GridSearch`. `Tieu_chi` được tạo từ mô tả các cột trong `reporting.py`. Kết quả lưu tại
-`models/softmax/evaluation_results.json`, metadata được tạo cùng điểm CV/test,
-và `export_excel.py` đọc các kết quả này để cập nhật **`models/model_evaluation_results.xlsx`**.
+Mỗi thuật toán lưu kết quả trong thư mục riêng:
 
-Excel chỉ gồm 3 sheet:
-
-| Sheet | Nội dung |
+| File | Nội dung |
 | --- | --- |
-| `Tong_hop` | Một dòng kết quả Softmax tốt nhất, 13 cột thông tin và chỉ số CV/train/test |
-| `Tieu_chi` | Giải thích từng cột tổng hợp |
-| `GridSearch` | Tất cả siêu tham số đã thử, điểm CV, thứ hạng và cột đánh dấu cấu hình được chọn |
+| `train.py` | Tìm siêu tham số, fit và lưu mô hình tốt nhất |
+| `evaluate.ipynb` | Đánh giá mô hình, xem bảng kết quả và lưu JSON |
+| `export_excel.py` | Tổng hợp các kết quả đã đánh giá vào Excel chung |
+| `model.joblib` | Mô hình tốt nhất đã fit; Softmax lưu cả scaler trong pipeline |
+| `training_results.joblib` | Dictionary gồm `search` (GridSearchCV đã fit), `finished_at`, `versions` |
+| `model_metadata.json` | Đặc trưng, nhãn, tham số, phiên bản thư viện và điểm CV/test |
+| `evaluation_results.json` | Hai bảng `Tong_hop` và `GridSearch` |
 
-Chỉ những thư mục có kết quả đánh giá mới được tổng hợp. Có thể tạo lại
-Excel từ các kết quả đã lưu mà không train lại:
+Sau khi chạy notebook đánh giá, xuất báo cáo chung:
 
 ```powershell
 python -m models.reporting
 ```
 
-Khi train lại, metadata và kết quả JSON cũ của Softmax bị xóa; chạy lại notebook
-`evaluate.ipynb` rồi `export_excel.py` để cập nhật Excel. Đóng file Excel trước khi xuất báo cáo.
-Điểm CV của tham số đã chọn là
-điểm dùng trong tối ưu, không phải nested CV; test là đánh giá holdout cuối.
+Có thể dùng `python -m models.softmax.export_excel` hoặc
+`python -m models.decision_tree.export_excel` để xuất cùng báo cáo.
+Kết quả nằm tại [models/model_evaluation_results.xlsx](models/model_evaluation_results.xlsx):
 
-<<<<<<< HEAD
-## Chạy ứng dụng
+| Sheet | Nội dung |
+| --- | --- |
+| `Tong_hop` | Một dòng cho mỗi mô hình tốt nhất đã đánh giá, gồm 13 cột |
+| `Tieu_chi` | Giải thích các cột tổng hợp |
+| `GridSearch` | Các cấu hình đã thử, điểm CV, độ lệch chuẩn, thứ hạng và cột `Selected` |
 
-Backend tải `models/softmax/model.joblib` một lần khi khởi động:
+Chỉ các thư mục có `evaluation_results.json` mới được tổng hợp. Chạy lại train
+sẽ ghi đè model/checkpoint và xóa metadata cùng kết quả JSON cũ của thuật toán;
+Decision Tree còn xóa hình cây cũ. Sau đó cần chạy lại notebook và xuất Excel.
+Đóng file Excel trước khi xuất báo cáo.
+
+### Kết quả đã lưu
+
+Các chỉ số dưới đây lấy từ `model_metadata.json` của từng thuật toán:
+
+| Mô hình | CV F1-macro | Test Accuracy | Test F1-macro |
+| --- | ---: | ---: | ---: |
+| Softmax | 97,76% | 98,41% | 98,40% |
+| Decision Tree | 98,52% | 97,95% | 97,94% |
+
+Softmax được chọn với `C=100`. Decision Tree được chọn với `criterion="gini"`,
+`max_depth=None`, `min_samples_split=2`, `min_samples_leaf=1`, `ccp_alpha=0.0`;
+cây đã fit có độ sâu 17, 38 lá và 75 nút.
+Điểm CV là điểm dùng trong tìm siêu tham số; điểm test là đánh giá holdout.
+
+## Kiểm thử
+
+Chạy toàn bộ kiểm thử Backend, Frontend và model:
 
 ```powershell
-python -m uvicorn backend.app:app --reload --port 8000
+python -m pytest tests frontend/test_app.py src/test_model.py -q
 ```
 
-Mở terminal khác để chạy frontend:
+Chỉ kiểm tra model, checkpoint, đánh giá và Excel:
 
 ```powershell
-python -m streamlit run frontend/app.py
+python -m pytest tests/test_decision_tree.py src/test_model.py -q
 ```
 
-Đầu vào là 7 giá trị gốc theo thứ tự đặc trưng nêu trên. Pipeline tự chuẩn hóa
-và trả tên cây dạng chuỗi; `predict_proba` dùng thứ tự nhãn trong `model.classes_`.
-Khi triển khai, mang theo `models/softmax/model.joblib` và metadata, dùng cùng
-phiên bản scikit-learn được ghi trong metadata. Khởi động lại backend sau khi đổi model.
-
-Kiểm tra API:
-
-```powershell
-python -m pip install -r backend/requirements_backend.txt
-python -m pytest tests/test_backend.py -q
-```
-=======
-`src/test_model.py` kiểm tra model đã lưu so với checkpoint, thứ tự đặc trưng,
-nhãn cây, chất lượng trên toàn bộ tập test (F1-macro tối thiểu 95%), dự đoán từ
-mẫu JSON, xác suất và tính nhất quán giữa dự đoán đơn lẻ/hàng loạt.
-Model, metadata và checkpoint hiện được Git theo dõi trong checkout được kiểm
-tra. Khi đóng gói, cần giữ chúng cùng dữ liệu processed để chạy đủ kiểm thử.
-Backend không nạp scaler riêng và không chuẩn hóa lại đầu vào. Xác suất Top 3
-lấy trực tiếp từ model, không chuẩn hóa riêng tổng Top 3; đây không phải tỷ lệ
-đảm bảo cây trồng phát triển tốt. Calibration chưa được xác minh đầy đủ.
->>>>>>> origin/main
+Các kiểm thử model cần có model, checkpoint, metadata, CSV processed và báo cáo
+Excel tương ứng. `src/test_model.py` kiểm tra Softmax;
+`tests/test_decision_tree.py` kiểm tra Decision Tree, lưới tham số, cây đã lưu,
+điểm test, hình cây và các bảng Excel. Kiểm thử không ghi đè các artifact đã lưu.
