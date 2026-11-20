@@ -57,8 +57,7 @@ def create_app() -> FastAPI:
     )
     def predict(crop: CropInput, request: Request) -> CropResponse:
         try:
-            label = request.app.state.model_service.predict(crop)
-            return CropResponse(recommended_crop=label)
+            return request.app.state.model_service.predict(crop)
         except ModelUnavailableError:
             raise HTTPException(
                 status_code=503,

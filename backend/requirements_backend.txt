@@ -1,9 +1,11 @@
-fastapi>=0.100.0
-uvicorn[standard]>=0.22.0
-pydantic>=2.0.0
-scikit-learn>=1.3.0
-pandas>=2.0.0
-numpy>=1.24.0
-joblib>=1.3.0
-pytest>=7.4.0
-httpx>=0.24.0
+# API/test versions below include the versions exercised in the existing .venv.
+# Ranges are not a lockfile; use ../requirements-artifact.txt for model pins.
+fastapi>=0.162.0,<0.163
+uvicorn[standard]>=0.54.0,<0.55
+pydantic>=2.14.3,<3
+scikit-learn>=1.9.0,<1.10
+pandas>=3.0.5,<4
+numpy>=2.5.2,<3
+joblib>=1.5.3,<2
+pytest==9.2.0
+httpx==0.28.1
