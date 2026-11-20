@@ -6,8 +6,8 @@
 Dataset gồm **2.200 mẫu, 22 loại cây**, mỗi loại 100 mẫu. Dữ liệu được chia có
 phân tầng theo nhãn: **1.760 mẫu train và 440 mẫu test**, `random_state=42`.
 
-Hiện đã huấn luyện **Softmax và Decision Tree**. Các thư mục KNN, Naive Bayes,
-SVM và Random Forest đang để trống. Backend hiện sử dụng **Softmax** tại
+Hiện đã huấn luyện **Softmax, Decision Tree và Random Forest**. Các thư mục KNN,
+Naive Bayes và SVM đang để trống. Backend hiện sử dụng **Softmax** tại
 `models/softmax/model.joblib`.
 
 ## Cấu trúc thư mục
@@ -44,7 +44,17 @@ models/
   knn/                              # Chỉ có .gitkeep
   naive_bayes/                      # Chỉ có .gitkeep
   svm/                              # Chỉ có .gitkeep
-  random_forest/                    # Chỉ có .gitkeep
+  random_forest/
+    train.py
+    evaluate.ipynb
+    export_excel.py
+    model.joblib
+    training_results.joblib
+    model_metadata.json
+    evaluation_results.json
+    feature_importance.csv
+    feature_importance.png
+    feature_importance.svg
 src/
   preprocessing.py                  # Làm sạch và chia dữ liệu
   download_data.py                   # Tải dataset
@@ -82,7 +92,7 @@ python -m pip check
 Nếu PowerShell chặn activation, thay `python` bằng `.\.venv\Scripts\python.exe`
 trong các lệnh. Linux/macOS dùng `source .venv/bin/activate`.
 
-Các phiên bản được ghi trong metadata của cả hai mô hình:
+Các phiên bản được ghi trong metadata của các mô hình:
 
 | Thành phần | Phiên bản |
 | --- | --- |
@@ -176,7 +186,7 @@ Các bước tải lại và lưu CSV có thể ghi đè dữ liệu hiện có.
 
 ## Huấn luyện và đánh giá
 
-Cả hai thuật toán dùng `StratifiedKFold(n_splits=5, shuffle=True, random_state=42)`
+Các thuật toán dùng `StratifiedKFold(n_splits=5, shuffle=True, random_state=42)`
 và GridSearchCV với hai chỉ số Accuracy, F1-macro. Siêu tham số được chọn theo
 **F1-macro validation trung bình** (`refit="f1_macro"`), sau đó mô hình tốt nhất
 được fit lại trên toàn bộ train. Tập test chỉ dùng để đánh giá cuối cùng.
@@ -223,6 +233,36 @@ Phần 6 vẽ toàn bộ cây có siêu tham số tốt nhất và lưu
 [PNG](models/decision_tree/best_decision_tree.png) cùng
 [SVG](models/decision_tree/best_decision_tree.svg). Mở SVG để phóng to từng nút.
 
+### Random Forest
+
+```powershell
+python -m models.random_forest.train
+```
+
+RandomForestClassifier dùng `random_state=42`, nhận đặc trưng gốc và thử
+**16 tổ hợp** tham số:
+
+```python
+param_grid = {
+    "n_estimators": [100, 300],
+    "max_depth": [10, 20],
+    "min_samples_leaf": [1, 3],
+    "max_features": ["sqrt"],
+    "criterion": ["gini", "entropy"],
+}
+```
+
+Sau khi train, chạy **Run All** trong
+[evaluate.ipynb của Random Forest](models/random_forest/evaluate.ipynb).
+Phần 6 có bảng và biểu đồ **Feature Importance**, lấy từ
+`model.feature_importances_` của rừng tốt nhất đã fit trên tập train.
+Độ quan trọng được tính bằng mức giảm độ hỗn tạp trung bình (MDI), có tổng bằng 1.
+Cột `Std_across_trees` và thanh sai số thể hiện độ lệch chuẩn giữa các cây.
+
+Kết quả được lưu thành [CSV](models/random_forest/feature_importance.csv),
+[PNG](models/random_forest/feature_importance.png),
+[SVG](models/random_forest/feature_importance.svg) và trong `evaluation_results.json`.
+
 ### Các file kết quả và báo cáo Excel
 
 Mỗi thuật toán lưu kết quả trong thư mục riêng:
@@ -235,7 +275,7 @@ Mỗi thuật toán lưu kết quả trong thư mục riêng:
 | `model.joblib` | Mô hình tốt nhất đã fit; Softmax lưu cả scaler trong pipeline |
 | `training_results.joblib` | Dictionary gồm `search` (GridSearchCV đã fit), `finished_at`, `versions` |
 | `model_metadata.json` | Đặc trưng, nhãn, tham số, phiên bản thư viện và điểm CV/test |
-| `evaluation_results.json` | Hai bảng `Tong_hop` và `GridSearch` |
+| `evaluation_results.json` | Hai bảng `Tong_hop` và `GridSearch`; Random Forest lưu thêm Feature Importance |
 
 Sau khi chạy notebook đánh giá, xuất báo cáo chung:
 
@@ -243,8 +283,9 @@ Sau khi chạy notebook đánh giá, xuất báo cáo chung:
 python -m models.reporting
 ```
 
-Có thể dùng `python -m models.softmax.export_excel` hoặc
-`python -m models.decision_tree.export_excel` để xuất cùng báo cáo.
+Các lệnh `python -m models.softmax.export_excel`,
+`python -m models.decision_tree.export_excel` và
+`python -m models.random_forest.export_excel` đều xuất cùng báo cáo.
 Kết quả nằm tại [models/model_evaluation_results.xlsx](models/model_evaluation_results.xlsx):
 
 | Sheet | Nội dung |
@@ -255,7 +296,8 @@ Kết quả nằm tại [models/model_evaluation_results.xlsx](models/model_eval
 
 Chỉ các thư mục có `evaluation_results.json` mới được tổng hợp. Chạy lại train
 sẽ ghi đè model/checkpoint và xóa metadata cùng kết quả JSON cũ của thuật toán;
-Decision Tree còn xóa hình cây cũ. Sau đó cần chạy lại notebook và xuất Excel.
+Decision Tree còn xóa hình cây cũ; Random Forest xóa bảng và hình Feature Importance cũ.
+Sau đó cần chạy lại notebook và xuất Excel.
 Đóng file Excel trước khi xuất báo cáo.
 
 ### Kết quả đã lưu
@@ -266,10 +308,15 @@ Các chỉ số dưới đây lấy từ `model_metadata.json` của từng thu�
 | --- | ---: | ---: | ---: |
 | Softmax | 97,76% | 98,41% | 98,40% |
 | Decision Tree | 98,47% | 97,95% | 97,94% |
+| Random Forest | 99,43% | 99,55% | 99,55% |
 
 Softmax được chọn với `C=100`. Decision Tree được chọn với `criterion="gini"`,
 `max_depth=12`, `min_samples_split=2`, `min_samples_leaf=1`, `ccp_alpha=0.0`;
 cây đã fit có độ sâu 12, 32 lá và 63 nút.
+Random Forest được chọn với `n_estimators=100`, `max_depth=20`,
+`min_samples_leaf=1`, `max_features="sqrt"`, `criterion="entropy"`.
+Theo Feature Importance (MDI), ba đặc trưng có độ quan trọng cao nhất trong rừng
+này là `humidity` (22,37%), `K` (19,40%) và `rainfall` (19,15%).
 Điểm CV là điểm dùng trong tìm siêu tham số; điểm test là đánh giá holdout.
 
 ## Kiểm thử

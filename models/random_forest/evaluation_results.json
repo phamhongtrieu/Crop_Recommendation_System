@@ -1,0 +1,230 @@
+{
+  "model_name": "Random Forest",
+  "evaluated_at": "2026-11-20T21:14:20+07:00",
+  "feature_importance_method": "mean_decrease_in_impurity",
+  "feature_importance": [
+    {
+      "Rank": 1,
+      "Feature": "humidity",
+      "Importance": 0.22371688653409766,
+      "Std_across_trees": 0.08933060276821905
+    },
+    {
+      "Rank": 2,
+      "Feature": "K",
+      "Importance": 0.19399483581004184,
+      "Std_across_trees": 0.08295080892666201
+    },
+    {
+      "Rank": 3,
+      "Feature": "rainfall",
+      "Importance": 0.19146860691350626,
+      "Std_across_trees": 0.06761055113037988
+    },
+    {
+      "Rank": 4,
+      "Feature": "P",
+      "Importance": 0.14580820102923167,
+      "Std_across_trees": 0.06700013395636013
+    },
+    {
+      "Rank": 5,
+      "Feature": "N",
+      "Importance": 0.14566401765678347,
+      "Std_across_trees": 0.06615557177476018
+    },
+    {
+      "Rank": 6,
+      "Feature": "temperature",
+      "Importance": 0.06879162918683235,
+      "Std_across_trees": 0.03906270815891655
+    },
+    {
+      "Rank": 7,
+      "Feature": "ph",
+      "Importance": 0.03055582286950668,
+      "Std_across_trees": 0.019933804347833654
+    }
+  ],
+  "tables": {
+    "Tong_hop": [
+      {
+        "Model": "Random Forest",
+        "Configuration": "GridSearch",
+        "CV_accuracy_mean": 0.9943181818181819,
+        "CV_f1_macro_mean": 0.9943037020193308,
+        "CV_f1_macro_std": 0.004033415896599595,
+        "Test_accuracy": 0.9954545454545455,
+        "Test_precision_macro": 0.9956709956709957,
+        "Test_recall_macro": 0.9954545454545454,
+        "Test_f1_macro": 0.9954517027687758,
+        "Train_f1_macro": 1.0,
+        "CV_train_validation_gap_F1": 0.005696297980669174,
+        "Preprocessing": "None (raw features)",
+        "Best_grid_parameters": "{\"criterion\": \"entropy\", \"max_depth\": 20, \"max_features\": \"sqrt\", \"min_samples_leaf\": 1, \"n_estimators\": 100}"
+      }
+    ],
+    "GridSearch": [
+      {
+        "Model": "Random Forest",
+        "Candidate": 1,
+        "Parameters": "{\"criterion\": \"gini\", \"max_depth\": 10, \"max_features\": \"sqrt\", \"min_samples_leaf\": 1, \"n_estimators\": 100}",
+        "Rank_CV_F1_macro": 2,
+        "Selected": false,
+        "CV_accuracy_mean": 0.9943181818181819,
+        "CV_f1_macro_mean": 0.994282386283005,
+        "CV_f1_macro_std": 0.006001809977042492
+      },
+      {
+        "Model": "Random Forest",
+        "Candidate": 2,
+        "Parameters": "{\"criterion\": \"gini\", \"max_depth\": 10, \"max_features\": \"sqrt\", \"min_samples_leaf\": 1, \"n_estimators\": 300}",
+        "Rank_CV_F1_macro": 5,
+        "Selected": false,
+        "CV_accuracy_mean": 0.99375,
+        "CV_f1_macro_mean": 0.9937136490573764,
+        "CV_f1_macro_std": 0.005550849628890096
+      },
+      {
+        "Model": "Random Forest",
+        "Candidate": 3,
+        "Parameters": "{\"criterion\": \"gini\", \"max_depth\": 10, \"max_features\": \"sqrt\", \"min_samples_leaf\": 3, \"n_estimators\": 100}",
+        "Rank_CV_F1_macro": 16,
+        "Selected": false,
+        "CV_accuracy_mean": 0.9920454545454545,
+        "CV_f1_macro_mean": 0.9919321631379592,
+        "CV_f1_macro_std": 0.00785319450173911
+      },
+      {
+        "Model": "Random Forest",
+        "Candidate": 4,
+        "Parameters": "{\"criterion\": \"gini\", \"max_depth\": 10, \"max_features\": \"sqrt\", \"min_samples_leaf\": 3, \"n_estimators\": 300}",
+        "Rank_CV_F1_macro": 10,
+        "Selected": false,
+        "CV_accuracy_mean": 0.9931818181818182,
+        "CV_f1_macro_mean": 0.993124506399268,
+        "CV_f1_macro_std": 0.006453330808148113
+      },
+      {
+        "Model": "Random Forest",
+        "Candidate": 5,
+        "Parameters": "{\"criterion\": \"gini\", \"max_depth\": 20, \"max_features\": \"sqrt\", \"min_samples_leaf\": 1, \"n_estimators\": 100}",
+        "Rank_CV_F1_macro": 7,
+        "Selected": false,
+        "CV_accuracy_mean": 0.99375,
+        "CV_f1_macro_mean": 0.9937033460856128,
+        "CV_f1_macro_std": 0.006139964809894294
+      },
+      {
+        "Model": "Random Forest",
+        "Candidate": 6,
+        "Parameters": "{\"criterion\": \"gini\", \"max_depth\": 20, \"max_features\": \"sqrt\", \"min_samples_leaf\": 1, \"n_estimators\": 300}",
+        "Rank_CV_F1_macro": 5,
+        "Selected": false,
+        "CV_accuracy_mean": 0.99375,
+        "CV_f1_macro_mean": 0.9937136490573764,
+        "CV_f1_macro_std": 0.005550849628890096
+      },
+      {
+        "Model": "Random Forest",
+        "Candidate": 7,
+        "Parameters": "{\"criterion\": \"gini\", \"max_depth\": 20, \"max_features\": \"sqrt\", \"min_samples_leaf\": 3, \"n_estimators\": 100}",
+        "Rank_CV_F1_macro": 12,
+        "Selected": false,
+        "CV_accuracy_mean": 0.9926136363636363,
+        "CV_f1_macro_mean": 0.99253536374116,
+        "CV_f1_macro_std": 0.00695805029009964
+      },
+      {
+        "Model": "Random Forest",
+        "Candidate": 8,
+        "Parameters": "{\"criterion\": \"gini\", \"max_depth\": 20, \"max_features\": \"sqrt\", \"min_samples_leaf\": 3, \"n_estimators\": 300}",
+        "Rank_CV_F1_macro": 14,
+        "Selected": false,
+        "CV_accuracy_mean": 0.9920454545454547,
+        "CV_f1_macro_mean": 0.9919881427629045,
+        "CV_f1_macro_std": 0.005584321440940395
+      },
+      {
+        "Model": "Random Forest",
+        "Candidate": 9,
+        "Parameters": "{\"criterion\": \"entropy\", \"max_depth\": 10, \"max_features\": \"sqrt\", \"min_samples_leaf\": 1, \"n_estimators\": 100}",
+        "Rank_CV_F1_macro": 3,
+        "Selected": false,
+        "CV_accuracy_mean": 0.9943181818181819,
+        "CV_f1_macro_mean": 0.9942720833112414,
+        "CV_f1_macro_std": 0.006551387534856314
+      },
+      {
+        "Model": "Random Forest",
+        "Candidate": 10,
+        "Parameters": "{\"criterion\": \"entropy\", \"max_depth\": 10, \"max_features\": \"sqrt\", \"min_samples_leaf\": 1, \"n_estimators\": 300}",
+        "Rank_CV_F1_macro": 10,
+        "Selected": false,
+        "CV_accuracy_mean": 0.9931818181818182,
+        "CV_f1_macro_mean": 0.993124506399268,
+        "CV_f1_macro_std": 0.006453330808148113
+      },
+      {
+        "Model": "Random Forest",
+        "Candidate": 11,
+        "Parameters": "{\"criterion\": \"entropy\", \"max_depth\": 10, \"max_features\": \"sqrt\", \"min_samples_leaf\": 3, \"n_estimators\": 100}",
+        "Rank_CV_F1_macro": 8,
+        "Selected": false,
+        "CV_accuracy_mean": 0.99375,
+        "CV_f1_macro_mean": 0.9936728381924173,
+        "CV_f1_macro_std": 0.0078017729689381955
+      },
+      {
+        "Model": "Random Forest",
+        "Candidate": 12,
+        "Parameters": "{\"criterion\": \"entropy\", \"max_depth\": 10, \"max_features\": \"sqrt\", \"min_samples_leaf\": 3, \"n_estimators\": 300}",
+        "Rank_CV_F1_macro": 9,
+        "Selected": false,
+        "CV_accuracy_mean": 0.9931818181818182,
+        "CV_f1_macro_mean": 0.9931359465158757,
+        "CV_f1_macro_std": 0.00780787396927894
+      },
+      {
+        "Model": "Random Forest",
+        "Candidate": 13,
+        "Parameters": "{\"criterion\": \"entropy\", \"max_depth\": 20, \"max_features\": \"sqrt\", \"min_samples_leaf\": 1, \"n_estimators\": 100}",
+        "Rank_CV_F1_macro": 1,
+        "Selected": true,
+        "CV_accuracy_mean": 0.9943181818181819,
+        "CV_f1_macro_mean": 0.9943037020193308,
+        "CV_f1_macro_std": 0.004033415896599595
+      },
+      {
+        "Model": "Random Forest",
+        "Candidate": 14,
+        "Parameters": "{\"criterion\": \"entropy\", \"max_depth\": 20, \"max_features\": \"sqrt\", \"min_samples_leaf\": 1, \"n_estimators\": 300}",
+        "Rank_CV_F1_macro": 4,
+        "Selected": false,
+        "CV_accuracy_mean": 0.99375,
+        "CV_f1_macro_mean": 0.9937270970311843,
+        "CV_f1_macro_std": 0.005531460549509736
+      },
+      {
+        "Model": "Random Forest",
+        "Candidate": 15,
+        "Parameters": "{\"criterion\": \"entropy\", \"max_depth\": 20, \"max_features\": \"sqrt\", \"min_samples_leaf\": 3, \"n_estimators\": 100}",
+        "Rank_CV_F1_macro": 15,
+        "Selected": false,
+        "CV_accuracy_mean": 0.9920454545454547,
+        "CV_f1_macro_mean": 0.9919769294872947,
+        "CV_f1_macro_std": 0.006914376337657984
+      },
+      {
+        "Model": "Random Forest",
+        "Candidate": 16,
+        "Parameters": "{\"criterion\": \"entropy\", \"max_depth\": 20, \"max_features\": \"sqrt\", \"min_samples_leaf\": 3, \"n_estimators\": 300}",
+        "Rank_CV_F1_macro": 13,
+        "Selected": false,
+        "CV_accuracy_mean": 0.9920454545454545,
+        "CV_f1_macro_mean": 0.991999582879512,
+        "CV_f1_macro_std": 0.0071083094770496335
+      }
+    ]
+  }
+}

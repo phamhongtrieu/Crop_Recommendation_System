@@ -1,0 +1,77 @@
+{
+  "model_file": "model.joblib",
+  "model_name": "Random Forest",
+  "estimator": "RandomForestClassifier",
+  "configuration": "GridSearch",
+  "parameters": {
+    "criterion": "entropy",
+    "max_depth": 20,
+    "max_features": "sqrt",
+    "min_samples_leaf": 1,
+    "n_estimators": 100
+  },
+  "preprocessing": "None (raw features)",
+  "input_format": "Unscaled feature values in the order listed in features",
+  "features": [
+    "N",
+    "P",
+    "K",
+    "temperature",
+    "humidity",
+    "ph",
+    "rainfall"
+  ],
+  "classes": [
+    "apple",
+    "banana",
+    "blackgram",
+    "chickpea",
+    "coconut",
+    "coffee",
+    "cotton",
+    "grapes",
+    "jute",
+    "kidneybeans",
+    "lentil",
+    "maize",
+    "mango",
+    "mothbeans",
+    "mungbean",
+    "muskmelon",
+    "orange",
+    "papaya",
+    "pigeonpeas",
+    "pomegranate",
+    "rice",
+    "watermelon"
+  ],
+  "selection_metric": "CV_f1_macro_mean",
+  "cv_f1_macro_mean": 0.9943037020193308,
+  "cv_f1_macro_std": 0.004033415896599595,
+  "train_samples": 1760,
+  "test_samples": 440,
+  "n_splits": 5,
+  "cv_method": "StratifiedKFold(n_splits=5, random_state=42, shuffle=True)",
+  "training_finished_at": "2026-11-20T21:13:24+07:00",
+  "versions": {
+    "Python": "3.12.9",
+    "scikit-learn": "1.9.0",
+    "numpy": "2.5.2",
+    "pandas": "3.0.5",
+    "joblib": "1.5.3"
+  },
+  "evaluated_at": "2026-11-20T21:14:20+07:00",
+  "feature_importance": {
+    "method": "mean_decrease_in_impurity",
+    "source": "RandomForestClassifier.feature_importances_",
+    "csv_file": "feature_importance.csv",
+    "visualization_png": "feature_importance.png",
+    "visualization_svg": "feature_importance.svg"
+  },
+  "test_metrics": {
+    "accuracy": 0.9954545454545455,
+    "precision_macro": 0.9956709956709957,
+    "recall_macro": 0.9954545454545454,
+    "f1_macro": 0.9954517027687758
+  }
+}
