@@ -1,8 +1,3 @@
-"""Kiểm tra model đã xuất cho backend: python -m src.test_model.
-
-Cần chạy python -m src.export_model trước. Test không huấn luyện lại model.
-"""
-
 import json
 from pathlib import Path
 import unittest
@@ -19,14 +14,16 @@ PROJECT_DIR = Path(__file__).resolve().parents[1]
 class TestCropModel(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        model_dir = PROJECT_DIR / "models"
-        model_path = model_dir / "crop_model.joblib"
+        model_dir = PROJECT_DIR / "models" / "softmax"
+        model_path = model_dir / "model.joblib"
         metadata_path = model_dir / "model_metadata.json"
         if not model_path.is_file() or not metadata_path.is_file():
-            raise FileNotFoundError("Chạy python -m src.export_model trước khi test.")
+            raise FileNotFoundError("Chạy train.py và evaluate.ipynb trước khi test.")
 
         cls.model = joblib.load(model_path)
         cls.metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        cls.artifact = joblib.load(model_dir / "training_results.joblib")
+        cls.search = cls.artifact["search"]
         data_dir = PROJECT_DIR / "data" / "processed"
         cls.X_test = pd.read_csv(data_dir / "X_test.csv")
         cls.y_test = pd.read_csv(data_dir / "y_test.csv")["label"]
@@ -41,20 +38,71 @@ class TestCropModel(unittest.TestCase):
         self.assertEqual(len(self.predictions), len(self.y_test))
         self.assertTrue(set(self.predictions).issubset(self.metadata["classes"]))
 
-    def test_export_matches_best_cv_model(self):
-        artifact = joblib.load(
-            PROJECT_DIR / "notebooks" / "model_training_results.joblib"
-        )
-        summary = artifact["training_summary"]
-        candidates = summary.loc[summary["Configuration"] == "GridSearch"]
+    def test_saved_model_matches_best_cv_model(self):
+        artifact = self.artifact
         self.assertAlmostEqual(
-            self.metadata["cv_f1_macro_mean"], candidates["CV_f1_macro_mean"].max()
+            self.metadata["cv_f1_macro_mean"],
+            self.search.cv_results_["mean_test_f1_macro"].max(),
         )
-        self.assertEqual(self.metadata["training_run_id"], artifact["run_id"])
-        original = artifact["fitted_models"][self.metadata["model_name"]]["GridSearch"]
+        self.assertEqual(self.metadata["training_finished_at"], artifact["finished_at"])
+        self.assertEqual(self.metadata["parameters"], self.search.best_params_)
+        original = self.search.best_estimator_
         np.testing.assert_array_equal(
             self.predictions, original.predict(self.X_test)
         )
+
+    def test_scaler_is_fit_on_training_data(self):
+        X_train = pd.read_csv(PROJECT_DIR / "data" / "processed" / "X_train.csv")
+        scaler = self.model.named_steps["scaler"]
+        self.assertEqual(scaler.n_samples_seen_, len(X_train))
+        np.testing.assert_allclose(scaler.mean_, X_train.mean().to_numpy())
+        self.assertEqual(self.model.named_steps["model"].solver, "lbfgs")
+
+    def test_excel_matches_summary_and_grid_search(self):
+        from models.reporting import SUMMARY_COLUMNS, TABLE_NAMES
+
+        result = json.loads(
+            (PROJECT_DIR / "models" / "softmax" / "evaluation_results.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(set(result["tables"]), {"Tong_hop", "GridSearch"})
+        self.assertEqual(len(result["tables"]["Tong_hop"]), 1)
+        grid_results = self.search.cv_results_
+        grid_rows = result["tables"]["GridSearch"]
+        self.assertEqual(len(grid_rows), len(grid_results["params"]))
+        for i, candidate in enumerate(grid_rows):
+            self.assertEqual(candidate["Candidate"], i + 1)
+            self.assertEqual(json.loads(candidate["Parameters"]), grid_results["params"][i])
+            self.assertAlmostEqual(candidate["CV_accuracy_mean"], grid_results["mean_test_accuracy"][i])
+            self.assertAlmostEqual(candidate["CV_f1_macro_mean"], grid_results["mean_test_f1_macro"][i])
+            self.assertAlmostEqual(candidate["CV_f1_macro_std"], grid_results["std_test_f1_macro"][i])
+            self.assertEqual(candidate["Rank_CV_F1_macro"], grid_results["rank_test_f1_macro"][i])
+        with pd.ExcelFile(PROJECT_DIR / "models" / "model_evaluation_results.xlsx") as workbook:
+            self.assertEqual(workbook.sheet_names, ["Tong_hop", "Tieu_chi", "GridSearch"])
+            summary = pd.read_excel(workbook, sheet_name="Tong_hop")
+            self.assertEqual(summary.columns.tolist(), SUMMARY_COLUMNS)
+            for name in TABLE_NAMES:
+                expected = pd.DataFrame(result["tables"][name])
+                saved = pd.read_excel(workbook, sheet_name=name)
+                saved = saved.loc[saved["Model"] == "Softmax"].reset_index(drop=True)
+                pd.testing.assert_frame_equal(saved, expected, check_dtype=False, atol=1e-12)
+        for row in result["tables"]["Tong_hop"]:
+            self.assertEqual(row["Configuration"], "GridSearch")
+            expected_f1 = [
+                self.search.cv_results_[f"split{fold}_test_f1_macro"][self.search.best_index_]
+                for fold in range(self.search.n_splits_)
+            ]
+            self.assertAlmostEqual(np.mean(expected_f1), row["CV_f1_macro_mean"])
+            self.assertAlmostEqual(np.std(expected_f1, ddof=0), row["CV_f1_macro_std"])
+            model = self.search.best_estimator_
+            self.assertEqual(json.loads(row["Best_grid_parameters"]), self.search.best_params_)
+            self.assertAlmostEqual(accuracy_score(self.y_test, model.predict(self.X_test)), row["Test_accuracy"])
+        selected_candidates = [row for row in grid_rows if row["Selected"]]
+        self.assertEqual(len(selected_candidates), 1)
+        best_grid = selected_candidates[0]
+        self.assertTrue(best_grid["Selected"])
+        self.assertEqual(best_grid["Candidate"], self.search.best_index_ + 1)
+        self.assertEqual(json.loads(best_grid["Parameters"]), self.search.best_params_)
+        self.assertAlmostEqual(best_grid["CV_f1_macro_mean"], self.search.best_score_)
 
     def test_holdout_metrics(self):
         options = {

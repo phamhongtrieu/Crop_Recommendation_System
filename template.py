@@ -30,13 +30,20 @@ FILES_TO_CREATE = [
     BASE_DIR / "data" / "raw" / ".gitkeep",
     BASE_DIR / "data" / "processed" / ".gitkeep",
     
-    # Models directory
-    BASE_DIR / "models" / ".gitkeep",
+    # Models: mỗi thuật toán có thư mục riêng, chỉ Softmax được triển khai trước
+    BASE_DIR / "models" / "__init__.py",
+    BASE_DIR / "models" / "softmax" / "train.py",
+    BASE_DIR / "models" / "softmax" / "evaluate.ipynb",
+    BASE_DIR / "models" / "softmax" / "export_excel.py",
+    BASE_DIR / "models" / "knn" / ".gitkeep",
+    BASE_DIR / "models" / "naive_bayes" / ".gitkeep",
+    BASE_DIR / "models" / "svm" / ".gitkeep",
+    BASE_DIR / "models" / "decision_tree" / ".gitkeep",
+    BASE_DIR / "models" / "random_forest" / ".gitkeep",
     
-    # Notebooks (MLOps experiment & training)
+    # Notebooks chỉ dành cho EDA và tiền xử lý
     BASE_DIR / "notebooks" / "01_exploratory_data_analysis.ipynb",
-    BASE_DIR / "notebooks" / "02_model_training_comparison.ipynb",
-    BASE_DIR / "notebooks" / "03_model_export.ipynb",
+    BASE_DIR / "notebooks" / "02_data_preprocessing.ipynb",
     
     # Source code (Reusable modules)
     BASE_DIR / "src" / "__init__.py",
@@ -107,12 +114,9 @@ data/processed/*
 !data/processed/.gitkeep
 
 # =============================================================================
-# Machine Learning Model Artifacts
+# Optional model formats (mã nguồn và kết quả trong models/ được lưu cùng dự án)
 # =============================================================================
-models/*
-!models/.gitkeep
 *.pkl
-*.joblib
 *.h5
 *.onnx
 
@@ -151,6 +155,7 @@ scikit-learn>=1.3.0
 pandas>=2.0.0
 numpy>=1.24.0
 joblib>=1.3.0
+openpyxl>=3.1.0
 
 # Data Visualization & Exploratory Analysis
 matplotlib>=3.7.0

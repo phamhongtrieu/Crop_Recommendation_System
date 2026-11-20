@@ -1,0 +1,85 @@
+{
+  "model_name": "Softmax",
+  "evaluated_at": "2026-11-20T15:11:27+07:00",
+  "tables": {
+    "Tong_hop": [
+      {
+        "Model": "Softmax",
+        "Configuration": "GridSearch",
+        "CV_accuracy_mean": 0.977840909090909,
+        "CV_f1_macro_mean": 0.9775813387205055,
+        "CV_f1_macro_std": 0.0058487588325316425,
+        "Test_accuracy": 0.9840909090909091,
+        "Test_precision_macro": 0.9851966873706004,
+        "Test_recall_macro": 0.9840909090909092,
+        "Test_f1_macro": 0.9840494971805238,
+        "Train_f1_macro": 0.9903160528371504,
+        "CV_train_validation_gap_F1": 0.012599981628609869,
+        "Preprocessing": "StandardScaler",
+        "Best_grid_parameters": "{\"model__C\": 100.0}"
+      }
+    ],
+    "GridSearch": [
+      {
+        "Model": "Softmax",
+        "Candidate": 1,
+        "Parameters": "{\"model__C\": 0.001}",
+        "Rank_CV_F1_macro": 6,
+        "Selected": false,
+        "CV_accuracy_mean": 0.66875,
+        "CV_f1_macro_mean": 0.6157252957938286,
+        "CV_f1_macro_std": 0.016439483454721807
+      },
+      {
+        "Model": "Softmax",
+        "Candidate": 2,
+        "Parameters": "{\"model__C\": 0.01}",
+        "Rank_CV_F1_macro": 5,
+        "Selected": false,
+        "CV_accuracy_mean": 0.7909090909090908,
+        "CV_f1_macro_mean": 0.7682576395226879,
+        "CV_f1_macro_std": 0.015653802727931224
+      },
+      {
+        "Model": "Softmax",
+        "Candidate": 3,
+        "Parameters": "{\"model__C\": 0.1}",
+        "Rank_CV_F1_macro": 4,
+        "Selected": false,
+        "CV_accuracy_mean": 0.9318181818181819,
+        "CV_f1_macro_mean": 0.9301487155437416,
+        "CV_f1_macro_std": 0.009725702654946176
+      },
+      {
+        "Model": "Softmax",
+        "Candidate": 4,
+        "Parameters": "{\"model__C\": 1.0}",
+        "Rank_CV_F1_macro": 3,
+        "Selected": false,
+        "CV_accuracy_mean": 0.9681818181818181,
+        "CV_f1_macro_mean": 0.9678236006626216,
+        "CV_f1_macro_std": 0.006765232166249332
+      },
+      {
+        "Model": "Softmax",
+        "Candidate": 5,
+        "Parameters": "{\"model__C\": 10.0}",
+        "Rank_CV_F1_macro": 2,
+        "Selected": false,
+        "CV_accuracy_mean": 0.9772727272727273,
+        "CV_f1_macro_mean": 0.976996932617304,
+        "CV_f1_macro_std": 0.007324434995514067
+      },
+      {
+        "Model": "Softmax",
+        "Candidate": 6,
+        "Parameters": "{\"model__C\": 100.0}",
+        "Rank_CV_F1_macro": 1,
+        "Selected": true,
+        "CV_accuracy_mean": 0.977840909090909,
+        "CV_f1_macro_mean": 0.9775813387205055,
+        "CV_f1_macro_std": 0.0058487588325316425
+      }
+    ]
+  }
+}
