@@ -58,7 +58,7 @@
     "pandas": "3.0.5",
     "joblib": "1.5.3"
   },
-  "evaluated_at": "2026-11-22T10:17:44+07:00",
+  "evaluated_at": "2026-11-22T14:56:45+07:00",
   "test_metrics": {
     "accuracy": 0.9818181818181818,
     "precision_macro": 0.9823479152426521,

@@ -2,18 +2,20 @@
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from src.input_config import INPUT_LIMITS
+
 
 class CropInput(BaseModel):
-    """Supported demo ranges, not absolute physical limits."""
+    """Inclusive feature ranges computed from the raw dataset."""
     model_config = ConfigDict(strict=True, extra="forbid", allow_inf_nan=False)
 
-    N: float = Field(ge=0, le=140)
-    P: float = Field(ge=0, le=145)
-    K: float = Field(ge=0, le=205)
-    temperature: float = Field(ge=0, le=50)
-    humidity: float = Field(ge=0, le=100)
-    ph: float = Field(ge=0, le=14)
-    rainfall: float = Field(ge=0, le=300)
+    N: float = Field(ge=INPUT_LIMITS["N"][0], le=INPUT_LIMITS["N"][1])
+    P: float = Field(ge=INPUT_LIMITS["P"][0], le=INPUT_LIMITS["P"][1])
+    K: float = Field(ge=INPUT_LIMITS["K"][0], le=INPUT_LIMITS["K"][1])
+    temperature: float = Field(ge=INPUT_LIMITS["temperature"][0], le=INPUT_LIMITS["temperature"][1])
+    humidity: float = Field(ge=INPUT_LIMITS["humidity"][0], le=INPUT_LIMITS["humidity"][1])
+    ph: float = Field(ge=INPUT_LIMITS["ph"][0], le=INPUT_LIMITS["ph"][1])
+    rainfall: float = Field(ge=INPUT_LIMITS["rainfall"][0], le=INPUT_LIMITS["rainfall"][1])
 
 
 class CropProbability(BaseModel):

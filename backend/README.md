@@ -2,7 +2,7 @@
 
 Project 1 cung cấp REST API bằng FastAPI và Pydantic v2 để nhận các chỉ số
 nông nghiệp, khí hậu và trả tên cây trồng từ mô hình của nhóm ML.
-Backend nạp pipeline thật từ `models/crop_model.joblib` khi khởi động. Nếu thiếu
+Backend nạp Random Forest từ `models/random_forest/model.joblib` khi khởi động. Nếu thiếu
 hoặc không nạp được mô hình, `/health` báo trạng thái và `/predict` trả 503.
 
 ## Cấu trúc
@@ -19,11 +19,11 @@ tests/
   test_backend.py           # TestClient và mô hình mock trong bộ nhớ
   test_backend_integration.py # Kiểm thử API với mô hình thật, chỉ đọc artifact
 models/
-  softmax/
+  random_forest/
     train.py                # GridSearchCV và lưu model tốt nhất
     evaluate.ipynb          # Đánh giá và xem kết quả từng bước
     export_excel.py         # Xuất báo cáo Excel chung
-    model.joblib            # Pipeline StandardScaler + Softmax
+    model.joblib            # RandomForestClassifier nhận đặc trưng gốc
     model_metadata.json     # Hợp đồng đầu vào, CV/test và phiên bản thư viện
 ```
 
@@ -107,9 +107,9 @@ Response thực tế cho mẫu trên trong môi trường đã kiểm tra:
 {
   "recommended_crop": "rice",
   "top_3": [
-    {"crop": "rice", "probability": 0.9949621100770174},
-    {"crop": "jute", "probability": 0.005037889650666549},
-    {"crop": "coffee", "probability": 2.7231604551251243e-10}
+    {"crop": "rice", "probability": 0.96},
+    {"crop": "jute", "probability": 0.04},
+    {"crop": "apple", "probability": 0.0}
   ]
 }
 ```
@@ -121,7 +121,7 @@ Khi đồng hạng, giữ thứ tự trong `classes_`; không ép cây đầu ti
 `predict()`. Không làm tròn xác suất, không chuẩn hóa lại riêng Top 3; tổng xác suất
 của Top 3 không nhất thiết bằng 1.
 
-Đây là xác suất ước lượng của Gaussian Naive Bayes, không phải độ chính xác hay
+Đây là xác suất ước lượng của Random Forest, không phải độ chính xác hay
 tỷ lệ trồng thành công. Pipeline được bàn giao không có bước hiệu chuẩn xác suất;
 chưa kiểm chứng calibration và không tự huấn luyện thêm bước hiệu chuẩn.
 
@@ -135,9 +135,10 @@ Quy tắc dữ liệu:
 
 - Bắt buộc đủ 7 trường, tên và chữ hoa/thường như ví dụ. Không nhận trường thừa.
 - Chỉ nhận số JSON (số nguyên hoặc số thực), không nhận chuỗi số, boolean, null.
-- N từ 0 đến 140; P từ 0 đến 145; K từ 0 đến 205; rainfall từ 0 đến 300 mm.
-- Temperature từ 0 đến 50 °C; humidity từ 0 đến 100%; ph từ 0 đến 14, gồm hai đầu.
-  Đây là phạm vi hỗ trợ demo, khớp Frontend; mọi trường phải hữu hạn và từ chối NaN/Infinity.
+- N từ 0 đến 140; P từ 5 đến 145; K từ 5 đến 205; rainfall từ 20.21126747 đến 298.5601175 mm.
+- Temperature từ 8.825674745 đến 43.67549305 °C; humidity từ 14.25803981 đến 99.98187601%;
+  ph từ 3.504752314 đến 9.93509073, gồm hai đầu. Min/Max lấy trực tiếp từ CSV raw
+  bằng `src/input_config.py`, dùng chung với Frontend; mọi trường phải hữu hạn và từ chối NaN/Infinity.
 - Chưa xác minh đơn vị N/P/K và chu kỳ tổng hợp rainfall; không suy đoán đơn vị
   khi nhập số đo thực địa. Backend không chuyển đổi đơn vị.
 - HTTP 422 khi request sai (kể cả khi chưa có mô hình); `detail` chứa vị trí,
@@ -183,7 +184,7 @@ Không cần chạy IDE bằng quyền Administrator hoặc thay đổi ACL thư
 
 ## Hợp đồng bàn giao mô hình với Bảo Kha
 
-1. Artifact Joblib đáng tin cậy của nhóm nằm tại `models/softmax/model.joblib`.
+1. Artifact Joblib đáng tin cậy của nhóm nằm tại `models/random_forest/model.joblib`.
    Joblib có thể thực thi mã khi deserialize: chỉ nạp artifact đã xác nhận nguồn.
 2. Artifact là estimator hoặc một pipeline hoàn chỉnh có `predict(X)`,
    `predict_proba(X)` và `classes_`. Backend
@@ -210,28 +211,11 @@ Sau khi đặt artifact, dừng và khởi động lại Uvicorn; chỉ nạp m�
 cũng chỉ thử một lần; đặt file sau đó cần khởi động lại. Kiểm tra `/health`, rồi thử
 `/predict` bằng các mẫu kiểm chứng của nhóm ML.
 
-<<<<<<< HEAD
-Pipeline hiện tại gồm StandardScaler và Softmax; tham số được chọn theo CV trên
-train. Chạy `python -m models.softmax.train`, chạy các cell trong `models/softmax/evaluate.ipynb`,
-sau đó chạy `python models/softmax/export_excel.py` để tạo lại model và báo cáo.
-`models/softmax/model_metadata.json` ghi phiên bản
-thư viện, thứ tự đặc trưng, nhãn và các chỉ số đánh giá.
-Backend không huấn luyện và không cung cấp confidence hoặc batch prediction.
-=======
-Artifact hiện tại là `Pipeline(scaler="passthrough", model=GaussianNB)` với
-`var_smoothing=1e-12`; nhận dữ liệu gốc đúng 7 cột và trả nhãn chuỗi. Không nạp
-`models/scaler.pkl`, tránh biến đổi dữ liệu ngoài pipeline.
-
-Metadata ghi Python 3.12.9, scikit-learn 1.9.0, NumPy 2.5.2, pandas 3.0.5,
-Joblib 1.5.3. Môi trường đã kiểm tra dùng Python 3.14.5, scikit-learn 1.9.1,
-NumPy 2.5.4, pandas 3.1.1, Joblib 1.6.0. Nạp và dự đoán mẫu thành công nhưng
-scikit-learn phát `InconsistentVersionWarning` cho GaussianNB và Pipeline.
-Kết quả kiểm thử không bảo đảm tương thích đầy đủ giữa các phiên bản; khi cần
-môi trường khớp bản export, dùng Python 3.12.9 và `requirements-artifact.txt`
-trong môi trường mới. Việc cài sạch và chạy toàn bộ trên cấu hình này
-**CHƯA XÁC MINH**; metadata không ghi đủ mọi dependency gián tiếp của môi trường train.
-Không tự động cài đặt hoặc thay đổi phiên bản khi chạy API.
-
-Backend không huấn luyện, không tự tạo mô hình và không cung cấp batch prediction.
-Khởi động lại server đang chạy để áp dụng response mới.
->>>>>>> origin/main
+Mô hình hiện tại là RandomForestClassifier với `n_estimators=100`, `max_depth=20`,
+`min_samples_leaf=1`, `max_features="sqrt"`, `criterion="entropy"`.
+Mô hình nhận trực tiếp 7 đặc trưng gốc. Chạy `python -m models.random_forest.train`,
+chạy các cell trong `models/random_forest/evaluate.ipynb`, rồi chạy
+`python -m models.random_forest.export_excel` để tạo lại mô hình và báo cáo.
+`models/random_forest/model_metadata.json` ghi phiên bản thư viện, thứ tự đặc trưng,
+nhãn và các chỉ số đánh giá. Sheet `Tong_hop` có lý do chọn Random Forest dưới bảng.
+Backend không huấn luyện và không cung cấp batch prediction.

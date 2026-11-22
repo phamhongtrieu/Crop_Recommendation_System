@@ -1,5 +1,6 @@
 """Backend contract tests; never read or write a real model artifact."""
 
+import csv
 import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -78,15 +79,25 @@ def test_malformed_json(client):
     assert client.post("/predict", content="{", headers={"Content-Type": "application/json"}).status_code == 422
 
 
-@pytest.mark.parametrize("humidity,ph", [(0, 0), (100, 14)])
-def test_inclusive_bounds(client, humidity, ph):
-    payload = {**SAMPLE, "N": 0, "P": 0, "K": 0, "rainfall": 0,
-               "temperature": 0, "humidity": humidity, "ph": ph}
+@pytest.mark.parametrize("position", [0, 1])
+def test_inclusive_bounds(client, position):
+    payload = {field: limits[position] for field, limits in DEMO_LIMITS.items()}
     assert client.post("/predict", json=payload).status_code == 503
 
 
-DEMO_LIMITS = {"N": (0, 140), "P": (0, 145), "K": (0, 205),
-               "temperature": (0, 50), "humidity": (0, 100), "ph": (0, 14), "rainfall": (0, 300)}
+with (Path(__file__).resolve().parents[1] / "data/raw/Crop_recommendation.csv").open(encoding="utf-8-sig") as source:
+    RAW_ROWS = list(csv.DictReader(source))
+DEMO_LIMITS = {
+    field: (min(float(row[field]) for row in RAW_ROWS), max(float(row[field]) for row in RAW_ROWS))
+    for field in FEATURE_NAMES
+}
+
+
+def test_openapi_documents_input_ranges(client):
+    schema = client.get("/openapi.json").json()["components"]["schemas"]["CropInput"]["properties"]
+    for field, (lower, upper) in DEMO_LIMITS.items():
+        assert schema[field]["minimum"] == lower
+        assert schema[field]["maximum"] == upper
 
 
 @pytest.mark.parametrize("field", DEMO_LIMITS)
@@ -278,7 +289,7 @@ def test_bad_artifact_does_not_prevent_startup(loader, artifact):
 
 def test_model_path_independent_of_working_directory(loader, monkeypatch):
     original_directory = Path.cwd()
-    expected_path = Path(__file__).resolve().parents[1] / "models" / "softmax" / "model.joblib"
+    expected_path = Path(__file__).resolve().parents[1] / "models" / "random_forest" / "model.joblib"
     # Avoid pytest's shared %TEMP%/pytest-of-Admin, which may belong to a
     # different Windows account when IDE and sandbox use the same TEMP path.
     with TemporaryDirectory(prefix="model-path-", dir=Path(__file__).resolve().parent) as directory:

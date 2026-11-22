@@ -4,24 +4,28 @@ import csv
 from html import escape
 import math
 from numbers import Real
+import os
 from pathlib import Path
 import random
+import sys
 
 import requests
 import streamlit as st
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-# Supported demo ranges; these are not absolute physical limits.
-INPUT_LIMITS = {
-    "N": (0.0, 140.0), "P": (0.0, 145.0), "K": (0.0, 205.0),
-    "temperature": (0.0, 50.0), "humidity": (0.0, 100.0),
-    "ph": (0.0, 14.0), "rainfall": (0.0, 300.0),
-}
+from src.input_config import INPUT_LIMITS, INPUT_STEPS, format_bound
+
+API_URL = os.environ.get("CROP_API_URL", "http://127.0.0.1:8000").strip().rstrip("/")
+REQUEST_TIMEOUT_SECONDS = 10.0
+
+
 INPUT_LABELS = {
     "N": "Nitrogen (N)", "P": "Phosphorus (P)", "K": "Potassium (K)",
     "temperature": "Temperature (°C)", "humidity": "Humidity (%)",
     "ph": "pH", "rainfall": "Rainfall (mm)",
 }
+INPUT_UNITS = {"temperature": " °C", "humidity": "%", "rainfall": " mm"}
 
 
 def validate_inputs(values):
@@ -32,7 +36,7 @@ def validate_inputs(values):
         if (isinstance(value, bool) or not isinstance(value, Real)
                 or not lower <= value <= upper or not math.isfinite(value)):
             errors[field] = (f"Giá trị {INPUT_LABELS[field]} không hợp lệ. "
-                             f"Vui lòng nhập số hữu hạn từ {lower:g} đến {upper:g}.")
+                             f"Vui lòng nhập số hữu hạn từ {format_bound(lower)} đến {format_bound(upper)}.")
     return errors
 
 
@@ -112,8 +116,8 @@ def show_prediction(crop, result):
     probability = next((item["probability"] for item in top_crops
                         if item["crop"].lower() == crop.strip().lower()), None)
     probability_label = (
-        f"Xác suất ước lượng của mô hình: {probability_text(probability)}"
-        if probability is not None else "Chưa có xác suất hợp lệ cho cây được đề xuất."
+        f"Xác suất dự đoán: {probability_text(probability)}"
+        if probability is not None else "Chưa có xác suất dự đoán hợp lệ cho cây được đề xuất."
     )
     st.markdown(
         '<div class="result-card"><div class="result-label">Cây trồng được đề xuất</div>'
@@ -123,16 +127,16 @@ def show_prediction(crop, result):
     )
     st.subheader("🌿 Top 3 cây trồng")
     if invalid:
-        st.warning("Một số dữ liệu Top 3 không hợp lệ đã được bỏ qua. Không thể hiển thị xác suất cho các mục này.")
+        st.warning("Một số dữ liệu Top 3 không hợp lệ đã được bỏ qua. Không thể hiển thị xác suất dự đoán cho các mục này.")
     if top_crops:
         for rank, item in enumerate(top_crops, start=1):
-            st.text(f"{rank}. {crop_display_name(item['crop'])} — {probability_text(item['probability'])}")
+            st.text(f"{rank}. {crop_display_name(item['crop'])} — Xác suất dự đoán: {probability_text(item['probability'])}")
             # st.progress truncates to whole percentages in Streamlit 1.67.
             # Keep sub-percent widths; only the fill, never the track, is green.
             percentage = item["probability"] * 100
             st.markdown(
                 '<div class="crop-probability-track" role="progressbar" '
-                f'aria-label="Xác suất {escape(item["crop"], quote=True)}" '
+                f'aria-label="Xác suất dự đoán {escape(item["crop"], quote=True)}" '
                 f'aria-valuenow="{percentage:.15g}" aria-valuemin="0" aria-valuemax="100">'
                 f'<div class="crop-probability-fill" style="width: {percentage:.15g}%"></div>'
                 '</div>',
@@ -140,43 +144,48 @@ def show_prediction(crop, result):
             )
     else:
         st.info("Backend chưa cung cấp danh sách Top 3 hợp lệ cho kết quả này.")
-    st.caption("Xác suất trên là ước lượng từ mô hình Machine Learning, không phải tỷ lệ đảm bảo cây trồng sẽ phát triển tốt trong thực tế.")
-
-
-@st.cache_data(ttl=30, max_entries=32, show_spinner=False)
-def backend_status(api_url):
-    """Cache each URL's health briefly to avoid a request on every rerun."""
-    if not api_url:
-        return "⚪ Chưa cấu hình kết nối Backend."
-    try:
-        response = requests.get(f"{api_url}/health", timeout=2.0)
-        response.raise_for_status()
-        health = response.json()
-        if not isinstance(health, dict) or health.get("status") != "ok":
-            return "🟠 Chưa xác nhận được trạng thái Backend."
-        if health.get("model_loaded") is True:
-            return "🟢 Backend đã kết nối · Mô hình sẵn sàng."
-        return "🟠 Backend đã kết nối · Mô hình chưa sẵn sàng."
-    except (requests.exceptions.RequestException, ValueError):
-        return "🔴 Chưa kết nối được Backend."
+    st.caption("Giá trị do mô hình ước lượng, không phải tỷ lệ trồng thành công.")
 
 
 def clear_prediction():
     st.session_state.pop("last_prediction", None)
 
 
-def agricultural_input(field, help_text, error, step=0.1, number_format=None):
+def update_input_from_slider(field):
+    st.session_state[f"crop_input_{field}"] = st.session_state[f"crop_slider_{field}"]
+    clear_prediction()
+
+
+def agricultural_input(field, help_text, error):
     """Scope visual validation to a stable container, keeping native controls."""
     with st.container(key=f"field_{field}", gap="small"):
-        options = {"format": number_format} if number_format else {}
+        step = INPUT_STEPS[field]
         value = st.number_input(
             INPUT_LABELS[field], value=None, step=step, key=f"crop_input_{field}",
-            help=help_text, on_change=clear_prediction, **options,
+            help=help_text, on_change=clear_prediction, format="%.2f",
         )
+        lower, upper = INPUT_LIMITS[field]
+        slider_key = f"crop_slider_{field}"
+        if (isinstance(value, Real) and not isinstance(value, bool)
+                and lower <= value <= upper and math.isfinite(value)):
+            st.session_state[slider_key] = float(value)
+        else:
+            # Keep invalid typed input visible; the slider can restore a valid value.
+            previous = st.session_state.get(slider_key)
+            if (isinstance(previous, bool) or not isinstance(previous, Real)
+                    or not lower <= previous <= upper or not math.isfinite(previous)):
+                st.session_state[slider_key] = lower
+        st.slider(
+            f"Chọn {INPUT_LABELS[field]}", min_value=lower, max_value=upper,
+            step=step, key=slider_key, format="%.2f",
+            label_visibility="collapsed", on_change=update_input_from_slider,
+            args=(field,),
+        )
+        st.caption(f"Khoảng giá trị: {format_bound(lower)}–{format_bound(upper)}{INPUT_UNITS.get(field, '')}")
         style, message = "", ""
         if error:
             lower, upper = INPUT_LIMITS[field]
-            message = f"{INPUT_LABELS[field]} phải nằm trong khoảng {lower:g}–{upper:g}."
+            message = f"{INPUT_LABELS[field]} phải nằm trong khoảng {format_bound(lower)}–{format_bound(upper)}."
             # Keep the existing border width/geometry. The inset adds a second
             # red pixel without resizing the input or styling stepper buttons.
             style = (
@@ -235,16 +244,21 @@ st.set_page_config(
     page_title="Gợi ý cây trồng",
     page_icon="🌱",
     layout="wide",
+    initial_sidebar_state="collapsed",
 )
 
 st.markdown(
     """
     <style>
+    .stApp { color: #1f2937; color-scheme: light; }
     [data-testid="stMain"] { background-color: #ffffff; }
-    [data-testid="stSidebar"] { background-color: #f8f8f8; }
+    [data-testid="stMain"] { color: #1f2937; }
+    [data-testid="stWidgetLabel"] p { color: #1f2937; }
+    [data-testid="stCaptionContainer"] p { color: #475569; }
     [data-testid="stMainBlockContainer"] { padding-top: 1.5rem; }
     .hero { padding: .25rem 0 .5rem; }
     .hero h1 { color: #14532d; margin-bottom: .25rem; }
+    .hero p { color: #475569; }
     .result-card { background: #EAF8EF; border: 1px solid #bbf7d0;
         border-radius: 16px; padding: 1.25rem; text-align: center; }
     .result-label { color: #166534; font-size: .95rem; }
@@ -255,6 +269,7 @@ st.markdown(
         background-color: #f8f8f8; border: 1px solid #d9d9d9; border-radius: 10px; }
     .st-key-crop_inputs [data-testid="stNumberInputContainer"] input {
         background-color: transparent; color: #262626; }
+    .st-key-crop_inputs [data-testid="stNumberInputClearButton"] { display: none; }
     .st-key-crop_inputs [data-testid="stButton"] button {
         background-color: #237A57; border-color: #237A57; color: #ffffff; }
     .st-key-crop_inputs [data-testid="stButton"] button:not(:disabled):hover {
@@ -276,21 +291,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
-with st.sidebar:
-    st.header("🌱 Crop Recommendation System")
-    connection_status = st.empty()
-    with st.expander("⚙️ Cài đặt nâng cao", expanded=False):
-        api_url = st.text_input(
-            "URL backend",
-            value="http://127.0.0.1:8000",
-            help="Nhập địa chỉ gốc của backend FastAPI; ứng dụng sẽ gọi /predict.",
-        ).strip().rstrip("/")
-        timeout_seconds = st.number_input(
-            "Thời gian chờ tối đa (giây)", min_value=1, max_value=120, value=10
-        )
-        st.caption("Backend cần đang chạy và cung cấp endpoint POST /predict.")
-    connection_status.caption(backend_status(api_url))
 
 st.markdown(
     '<div class="hero"><h1>🌱 Hệ thống gợi ý cây trồng</h1>'
@@ -314,20 +314,20 @@ with input_column:
 
 with input_column, st.container(border=True, key="crop_inputs"):
     st.subheader("Thông số nông nghiệp")
-    st.caption("Giới hạn nhập là phạm vi hỗ trợ của bản demo, không phải giới hạn vật lý tuyệt đối.")
+    st.caption("Khoảng nhập lấy theo Min/Max của từng đặc trưng trong dữ liệu raw.")
     col1, col2 = st.columns(2)
     with col1:
         # Native min/max rejects out-of-range edits in the browser without a
         # rerun. Validate in Python instead, so those edits invalidate results.
-        nitrogen = agricultural_input("N", "Hàm lượng đạm trong đất.", input_errors.get("N"), step=1.0)
-        phosphorus = agricultural_input("P", "Hàm lượng lân trong đất.", input_errors.get("P"), step=1.0)
-        potassium = agricultural_input("K", "Hàm lượng kali trong đất.", input_errors.get("K"), step=1.0)
+        nitrogen = agricultural_input("N", "Hàm lượng đạm trong đất.", input_errors.get("N"))
+        phosphorus = agricultural_input("P", "Hàm lượng lân trong đất.", input_errors.get("P"))
+        potassium = agricultural_input("K", "Hàm lượng kali trong đất.", input_errors.get("K"))
         temperature = agricultural_input("temperature", "Nhiệt độ môi trường (°C).",
-                                        input_errors.get("temperature"), number_format="%.2f")
+                                        input_errors.get("temperature"))
     with col2:
         humidity = agricultural_input("humidity", "Độ ẩm không khí (%).", input_errors.get("humidity"))
-        ph = agricultural_input("ph", "Độ chua/kiềm của đất.", input_errors.get("ph"), number_format="%.2f")
-        rainfall = agricultural_input("rainfall", "Lượng mưa (mm).", input_errors.get("rainfall"), step=1.0)
+        ph = agricultural_input("ph", "Độ chua/kiềm của đất.", input_errors.get("ph"))
+        rainfall = agricultural_input("rainfall", "Lượng mưa (mm).", input_errors.get("rainfall"))
     current_payload = dict(N=nitrogen, P=phosphorus, K=potassium, temperature=temperature,
                            humidity=humidity, ph=ph, rainfall=rainfall)
     validation_errors = validate_inputs(current_payload)
@@ -367,16 +367,16 @@ with result_column:
         if validate_inputs(current_payload):
             # Defensive guard even if a disabled button is triggered externally.
             pass
-        elif not api_url:
-            st.error("Vui lòng nhập URL backend trong thanh cấu hình bên trái.")
+        elif not API_URL:
+            st.error("Chưa cấu hình địa chỉ máy chủ dự đoán. Vui lòng kiểm tra cấu hình ứng dụng.")
         else:
             payload = current_payload.copy()
             try:
                 with st.spinner("Đang gửi thông số và chờ kết quả dự đoán..."):
                     response = requests.post(
-                        f"{api_url}/predict",
+                        f"{API_URL}/predict",
                         json=payload,
-                        timeout=float(timeout_seconds),
+                        timeout=REQUEST_TIMEOUT_SECONDS,
                     )
                 if not response.ok:
                     detail = ""
@@ -402,9 +402,9 @@ with result_column:
                             st.error("API phản hồi thành công nhưng không tìm thấy tên cây trồng. Hãy kiểm tra định dạng response của backend.")
                             st.caption(f"Phản hồi nhận được: {result}")
             except requests.exceptions.Timeout:
-                st.error(f"API phản hồi quá thời gian chờ ({timeout_seconds} giây). Vui lòng thử lại.")
+                st.error(f"API phản hồi quá thời gian chờ ({REQUEST_TIMEOUT_SECONDS:g} giây). Vui lòng thử lại.")
             except requests.exceptions.ConnectionError:
-                st.error(f"Không thể kết nối tới API tại {api_url}. Hãy kiểm tra backend và địa chỉ API.")
+                st.error("Không thể kết nối tới máy chủ dự đoán. Hãy kiểm tra Backend đã khởi động.")
             except requests.exceptions.RequestException as exc:
                 st.error(f"Không thể gửi yêu cầu tới API: {exc}")
 

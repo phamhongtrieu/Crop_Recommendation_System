@@ -5,6 +5,7 @@ import csv
 import math
 import re
 from contextlib import contextmanager
+from html import unescape
 from html.parser import HTMLParser
 from pathlib import Path
 from numbers import Real
@@ -12,10 +13,10 @@ from unittest.mock import Mock, mock_open, patch
 
 import pytest
 import requests
-import streamlit as st
 from streamlit.testing.v1 import AppTest
 from streamlit.testing.v1.errors import AppTestError
 
+from src.input_config import format_bound
 APP_PATH = Path(__file__).with_name("app.py")
 
 
@@ -24,11 +25,13 @@ class ProbabilityBars(HTMLParser):
         super().__init__()
         self.widths = []
         self.values = []
+        self.labels = []
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         if attrs.get("class") == "crop-probability-track":
             self.values.append(float(attrs["aria-valuenow"]))
+            self.labels.append(attrs["aria-label"])
         if attrs.get("class") == "crop-probability-fill":
             self.widths.append(float(attrs["style"].removeprefix("width: ").removesuffix("%")))
 
@@ -57,10 +60,8 @@ def assert_validation_warning(app):
 
 
 @pytest.fixture
-def api():
-    st.cache_data.clear()
-    health = Mock()
-    health.json.return_value = {"status": "ok", "model_loaded": True}
+def api(monkeypatch):
+    monkeypatch.delenv("CROP_API_URL", raising=False)
     response = Mock(ok=True)
     response.json.return_value = {
         "recommended_crop": "rice",
@@ -70,23 +71,25 @@ def api():
             {"crop": "coffee", "probability": 0.00001},
         ],
     }
-    with patch("requests.get", return_value=health), patch("requests.post", return_value=response) as post:
+    with patch("requests.post", return_value=response) as post:
         yield response, post
 
 
 def test_fractional_probability_widths_and_appearance(api):
     _, post = api
-    app = AppTest.from_file(str(APP_PATH)).run()
+    app = AppTest.from_file(str(APP_PATH)).run(timeout=10)
     assert not app.exception
     assert not parse_bars(app).widths
     assert len(app.main.number_input) == 7
-    assert app.sidebar.expander[0].proto.expanded is False
+    assert not app.sidebar.expander and not app.sidebar.number_input
+    assert not app.sidebar.header and not app.sidebar.text_input
     app.button(key="predict_crop").click().run()
     assert not app.exception
     bars = parse_bars(app)
     # Regression: jute must be 0.52% wide, never a full-width green track.
     assert bars.widths == pytest.approx([99.48, 0.52, 0.001])
     assert bars.values == pytest.approx(bars.widths)
+    assert all(label.startswith("Xác suất dự đoán ") for label in bars.labels)
     assert bars.widths[1] < 1
     assert any("<0.01%" in element.value for element in app.text)
     assert app.main.columns[-1].subheader[1].value == "🌿 Top 3 cây trồng"
@@ -100,11 +103,22 @@ def test_fractional_probability_widths_and_appearance(api):
     assert ".st-key-crop_inputs button" not in css
     assert '.st-key-crop_inputs [data-testid="stButton"] button {' in css
     assert '[data-testid="stMain"] { background-color: #ffffff; }' in css
-    assert '[data-testid="stSidebar"] { background-color: #f8f8f8; }' in css
     assert any("Rice" in element.value for element in app.main.columns[-1].markdown)
-    app.sidebar.expander[0].number_input[0].set_value(25).run()
+    app.run()
     assert parse_bars(app).widths == pytest.approx([99.48, 0.52, 0.001])
     assert post.call_count == 1
+
+
+def test_backend_url_can_be_configured_without_sidebar(api, monkeypatch):
+    _, post = api
+    monkeypatch.setenv("CROP_API_URL", " http://127.0.0.1:9000/ ")
+    app = AppTest.from_file(str(APP_PATH)).run()
+    assert not app.exception and not app.sidebar.expander
+    assert not app.text_input
+    app.button(key="predict_crop").click().run()
+    assert not app.exception
+    assert post.call_args.args == ("http://127.0.0.1:9000/predict",)
+    assert post.call_args.kwargs["timeout"] == 10.0
 
 
 @pytest.mark.parametrize("probability", [0.0, 0.0052, 0.00001, 0.9948, 1.0])
@@ -146,6 +160,8 @@ def test_all_input_tooltips(api):
     }
     for field, help_text in expected.items():
         assert app.number_input(key=f"crop_input_{field}").proto.help == help_text
+        lower, upper = DEMO_LIMITS[field]
+        assert any(f"Khoảng giá trị: {format_bound(lower)}–{format_bound(upper)}" in caption.value for caption in app.caption)
 
 
 def test_real_csv_sample_populates_form_without_predicting(api, monkeypatch, caplog):
@@ -176,6 +192,7 @@ def test_real_csv_sample_populates_form_without_predicting(api, monkeypatch, cap
         assert (label, tuple(expected[field] for field in fields)) in real_rows
         for field, value in expected.items():
             assert app.number_input(key=f"crop_input_{field}").value == value
+            assert app.slider(key=f"crop_slider_{field}").value == value
         assert not any('class="sample-reference"' in item.value for item in app.markdown)
         assert not any('class="result-card"' in item.value for item in app.markdown)
         assert "Đã random dữ liệu mẫu. Nhấn Dự đoán để xem kết quả." in app.get("toast")[-1].proto.body
@@ -217,8 +234,71 @@ def test_sample_read_error_preserves_existing_inputs(api, csv_data):
     post.assert_not_called()
 
 
-DEMO_LIMITS = {"N": (0., 140.), "P": (0., 145.), "K": (0., 205.),
-               "temperature": (0., 50.), "humidity": (0., 100.), "ph": (0., 14.), "rainfall": (0., 300.)}
+with (APP_PATH.parent.parent / "data/raw/Crop_recommendation.csv").open(encoding="utf-8-sig") as source:
+    RAW_ROWS = list(csv.DictReader(source))
+DEMO_LIMITS = {
+    field: (min(float(row[field]) for row in RAW_ROWS), max(float(row[field]) for row in RAW_ROWS))
+    for field in ("N", "P", "K", "temperature", "humidity", "ph", "rainfall")
+}
+EXPECTED_STEPS = {"N": 1., "P": 1., "K": 1., "temperature": 0.01,
+                  "humidity": 0.01, "ph": 0.01, "rainfall": 0.01}
+
+
+@pytest.mark.parametrize("field", DEMO_LIMITS)
+def test_slider_sync_ranges_and_recovery_from_invalid_input(api, field):
+    _, post = api
+    lower, upper = DEMO_LIMITS[field]
+    app = AppTest.from_file(str(APP_PATH)).run()
+    assert len(app.main.slider) == 7
+    slider = app.slider(key=f"crop_slider_{field}")
+    assert slider.proto.min == lower and slider.proto.max == upper
+    assert slider.proto.step == EXPECTED_STEPS[field]
+    assert app.number_input(key=f"crop_input_{field}").proto.step == EXPECTED_STEPS[field]
+    assert slider.value == app.number_input(key=f"crop_input_{field}").value
+
+    app.button(key="predict_crop").click().run()
+    app.slider(key=f"crop_slider_{field}").set_value(upper).run()
+    assert not app.exception
+    assert app.number_input(key=f"crop_input_{field}").value == upper
+    assert "last_prediction" not in app.session_state
+    assert post.call_count == 1
+
+    app.number_input(key=f"crop_input_{field}").set_value(lower).run()
+    assert app.slider(key=f"crop_slider_{field}").value == lower
+    app.button(key="predict_crop").click().run()
+    assert post.call_args.kwargs["json"][field] == lower
+    assert post.call_count == 2
+
+    app.number_input(key=f"crop_input_{field}").set_value(upper + 1).run()
+    assert app.button(key="predict_crop").disabled
+    assert app.slider(key=f"crop_slider_{field}").value == lower
+    assert "last_prediction" not in app.session_state
+    app.slider(key=f"crop_slider_{field}").set_value(upper).run()
+    assert not app.exception and not app.warning
+    assert app.number_input(key=f"crop_input_{field}").value == upper
+    assert not app.button(key="predict_crop").disabled
+    assert post.call_count == 2
+
+
+@pytest.mark.parametrize("probability, expected_label", [
+    (0.999999, "Xác suất dự đoán: >99.99%"),
+    (None, "Chưa có xác suất dự đoán hợp lệ cho cây được đề xuất."),
+])
+def test_probability_labels_in_result_card_and_top_crops(api, probability, expected_label):
+    response, _ = api
+    response.json.return_value = {"recommended_crop": "rice"}
+    if probability is not None:
+        response.json.return_value["top_3"] = [{"crop": "rice", "probability": probability}]
+    app = AppTest.from_file(str(APP_PATH)).run()
+    app.button(key="predict_crop").click().run()
+    assert not app.exception
+    assert any(expected_label in unescape(element.value) for element in app.markdown)
+    if probability is not None:
+        assert any(expected_label in element.value for element in app.text)
+        assert parse_bars(app).widths == pytest.approx([probability * 100])
+    visible_text = "\n".join(element.value for element in [*app.markdown, *app.caption, *app.text])
+    assert "Độ tin cậy" not in visible_text and "độ tin cậy" not in visible_text
+    assert any("Giá trị do mô hình ước lượng, không phải tỷ lệ trồng thành công." == caption.value for caption in app.caption)
 
 
 @pytest.mark.parametrize("position", ["lower", "middle", "upper"])
@@ -249,11 +329,13 @@ def test_stale_out_of_range_state_is_never_silently_clamped(api, field, side):
     lower, upper = DEMO_LIMITS[field]
     app = AppTest.from_file(str(APP_PATH))
     app.session_state[f"crop_input_{field}"] = lower - 0.01 if side == "below" else upper + 0.01
+    app.session_state[f"crop_slider_{field}"] = app.session_state[f"crop_input_{field}"]
     app.run()
     assert not app.exception
     assert_validation_warning(app)
     assert highlighted_fields(app) == {field}
     assert app.number_input(key=f"crop_input_{field}").value == (lower - 0.01 if side == "below" else upper + 0.01)
+    assert lower <= app.slider(key=f"crop_slider_{field}").value <= upper
     assert app.button(key="predict_crop").disabled
     post.assert_not_called()
 
@@ -337,15 +419,15 @@ def test_uniform_label_selection_filters_invalid_rows_and_keeps_labels_hidden(ap
 def test_single_label_sample_works_while_backend_is_offline(api):
     _, post = api
     data = "N,P,K,temperature,humidity,ph,rainfall,label\n50,30,25,25,70,6,100,new_crop\n"
-    with patch("requests.get", side_effect=requests.exceptions.ConnectionError()):
-        app = AppTest.from_file(str(APP_PATH)).run()
-        with csv_source(data):
-            for _ in range(3):
-                app.button(key="load_sample").click().run()
-                assert not app.exception
-                assert app.session_state["selected_sample"]["label"] == "new_crop"
-                assert not any("new_crop" in item.value for item in app.markdown)
-                post.assert_not_called()
+    post.side_effect = requests.exceptions.ConnectionError()
+    app = AppTest.from_file(str(APP_PATH)).run()
+    with csv_source(data):
+        for _ in range(3):
+            app.button(key="load_sample").click().run()
+            assert not app.exception
+            assert app.session_state["selected_sample"]["label"] == "new_crop"
+            assert not any("new_crop" in item.value for item in app.markdown)
+            post.assert_not_called()
 
 
 @pytest.mark.parametrize("missing", ["N", "P", "K", "temperature", "humidity", "ph", "rainfall", "label"])
@@ -430,7 +512,7 @@ def test_invalid_edit_hides_all_results_and_requires_new_prediction(api, field, 
     assert_validation_warning(app)
     assert highlighted_fields(app) == {field}
     lower, upper = DEMO_LIMITS[field]
-    assert any(f"{lower:g}–{upper:g}" in element.value for element in app.markdown)
+    assert any(f"{format_bound(lower)}–{format_bound(upper)}" in element.value for element in app.markdown)
     assert not parse_bars(app).widths
     assert not any('class="result-card"' in item.value for item in app.markdown)
     assert "last_prediction" not in app.session_state
@@ -498,7 +580,7 @@ def input_validator():
             for target in node.targets
         )
     )]
-    namespace = {"math": math, "Real": Real}
+    namespace = {"math": math, "Real": Real, "INPUT_LIMITS": DEMO_LIMITS, "format_bound": format_bound}
     exec(compile(ast.Module(body=definitions, type_ignores=[]), str(APP_PATH), "exec"), namespace)
     return namespace["validate_inputs"]
 
@@ -528,7 +610,7 @@ def test_field_error_highlights_are_scoped_reversible_and_cleared_by_random(api)
     app.number_input(key="crop_input_ph").set_value(100.).run()
     assert not app.exception
     assert highlighted_fields(app) == {"ph"}
-    assert any("pH phải nằm trong khoảng 0–14." in element.value for element in app.markdown)
+    assert any("pH phải nằm trong khoảng 3.50–9.94." in element.value for element in app.markdown)
     assert not parse_bars(app).widths
     assert [element.type for element in app.main.columns[0]] == initial_input_layout
     app.number_input(key="crop_input_ph").set_value(6.5).run()
