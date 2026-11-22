@@ -6,8 +6,8 @@
 Dataset gồm **2.200 mẫu, 22 loại cây**, mỗi loại 100 mẫu. Dữ liệu được chia có
 phân tầng theo nhãn: **1.760 mẫu train và 440 mẫu test**, `random_state=42`.
 
-Hiện đã huấn luyện **Softmax, Decision Tree, KNN và Random Forest**. Các thư mục
-Naive Bayes và SVM đang để trống. Backend hiện sử dụng **Softmax** tại
+Hiện đã huấn luyện **Softmax, Decision Tree, KNN, SVM và Random Forest**. Thư mục
+Naive Bayes đang để trống. Backend hiện sử dụng **Softmax** tại
 `models/softmax/model.joblib`.
 
 ## Cấu trúc thư mục
@@ -50,7 +50,14 @@ models/
     model_metadata.json
     evaluation_results.json
   naive_bayes/                      # Chỉ có .gitkeep
-  svm/                              # Chỉ có .gitkeep
+  svm/
+    train.py
+    evaluate.ipynb
+    export_excel.py
+    model.joblib
+    training_results.joblib
+    model_metadata.json
+    evaluation_results.json
   random_forest/
     train.py
     evaluate.ipynb
@@ -262,6 +269,27 @@ Sau khi train, chạy **Run All** trong
 [evaluate.ipynb của KNN](models/knn/evaluate.ipynb) để xem siêu tham số tốt nhất,
 bảng tổng hợp, toàn bộ kết quả GridSearch và lưu metadata cùng kết quả JSON.
 
+### SVM
+
+```powershell
+python -m models.svm.train
+```
+
+SVM dùng `Pipeline(StandardScaler, SVC(kernel="rbf"))`. StandardScaler được
+fit riêng trên train của từng fold; pipeline đã lưu nhận đặc trưng gốc và tự
+chuẩn hóa khi dự đoán. Lưới tham số gồm **16 tổ hợp**, tương ứng **80 lượt fit CV**:
+
+```python
+param_grid = {
+    "svc__C": [0.1, 1, 10, 100],
+    "svc__gamma": ["scale", 0.01, 0.1, 1],
+}
+```
+
+Sau khi train, chạy **Run All** trong
+[evaluate.ipynb của SVM](models/svm/evaluate.ipynb) để xem siêu tham số tốt nhất,
+bảng tổng hợp, toàn bộ kết quả GridSearch và lưu metadata cùng kết quả JSON.
+
 ### Random Forest
 
 ```powershell
@@ -301,7 +329,7 @@ Mỗi thuật toán lưu kết quả trong thư mục riêng:
 | `train.py` | Tìm siêu tham số, fit và lưu mô hình tốt nhất |
 | `evaluate.ipynb` | Đánh giá mô hình, xem bảng kết quả và lưu JSON |
 | `export_excel.py` | Tổng hợp các kết quả đã đánh giá vào Excel chung |
-| `model.joblib` | Mô hình tốt nhất đã fit; Softmax và KNN lưu cả scaler trong pipeline |
+| `model.joblib` | Mô hình tốt nhất đã fit; Softmax, KNN và SVM lưu cả scaler trong pipeline |
 | `training_results.joblib` | Dictionary gồm `search` (GridSearchCV đã fit), `finished_at`, `versions` |
 | `model_metadata.json` | Đặc trưng, nhãn, tham số, phiên bản thư viện và điểm CV/test |
 | `evaluation_results.json` | Hai bảng `Tong_hop` và `GridSearch`; Random Forest lưu thêm Feature Importance |
@@ -314,7 +342,8 @@ python -m models.reporting
 
 Các lệnh `python -m models.softmax.export_excel`,
 `python -m models.decision_tree.export_excel`,
-`python -m models.knn.export_excel` và
+`python -m models.knn.export_excel`,
+`python -m models.svm.export_excel` và
 `python -m models.random_forest.export_excel` đều xuất cùng báo cáo.
 Kết quả nằm tại [models/model_evaluation_results.xlsx](models/model_evaluation_results.xlsx):
 
@@ -339,12 +368,14 @@ Các chỉ số dưới đây lấy từ `model_metadata.json` của từng thu�
 | Softmax | 97,76% | 98,41% | 98,40% |
 | Decision Tree | 98,17% | 98,64% | 98,62% |
 | KNN | 97,54% | 98,18% | 98,17% |
+| SVM | 98,46% | 99,09% | 99,09% |
 | Random Forest | 99,43% | 99,55% | 99,55% |
 
 Softmax được chọn với `C=100`. Decision Tree được chọn với `criterion="entropy"`,
 `max_depth=12`, `min_samples_split=10`, `min_samples_leaf=1`;
 cây đã fit có độ sâu 11, 40 lá và 79 nút.
 KNN được chọn với `knn__n_neighbors=5`, `knn__weights="distance"`, `knn__p=1`.
+SVM được chọn với kernel RBF, `svc__C=1`, `svc__gamma=1`.
 Random Forest được chọn với `n_estimators=100`, `max_depth=20`,
 `min_samples_leaf=1`, `max_features="sqrt"`, `criterion="entropy"`.
 Theo Feature Importance (MDI), ba đặc trưng có độ quan trọng cao nhất trong rừng
