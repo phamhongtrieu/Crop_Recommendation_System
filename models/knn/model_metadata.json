@@ -1,0 +1,68 @@
+{
+  "model_file": "model.joblib",
+  "model_name": "KNN",
+  "estimator": "KNeighborsClassifier",
+  "configuration": "GridSearch",
+  "parameters": {
+    "knn__n_neighbors": 5,
+    "knn__p": 1,
+    "knn__weights": "distance"
+  },
+  "preprocessing": "StandardScaler",
+  "input_format": "Unscaled feature values in the order listed in features",
+  "features": [
+    "N",
+    "P",
+    "K",
+    "temperature",
+    "humidity",
+    "ph",
+    "rainfall"
+  ],
+  "classes": [
+    "apple",
+    "banana",
+    "blackgram",
+    "chickpea",
+    "coconut",
+    "coffee",
+    "cotton",
+    "grapes",
+    "jute",
+    "kidneybeans",
+    "lentil",
+    "maize",
+    "mango",
+    "mothbeans",
+    "mungbean",
+    "muskmelon",
+    "orange",
+    "papaya",
+    "pigeonpeas",
+    "pomegranate",
+    "rice",
+    "watermelon"
+  ],
+  "selection_metric": "CV_f1_macro_mean",
+  "cv_f1_macro_mean": 0.975439735575082,
+  "cv_f1_macro_std": 0.011259504293579359,
+  "train_samples": 1760,
+  "test_samples": 440,
+  "n_splits": 5,
+  "cv_method": "StratifiedKFold(n_splits=5, random_state=42, shuffle=True)",
+  "training_finished_at": "2026-11-22T10:17:28+07:00",
+  "versions": {
+    "Python": "3.12.9",
+    "scikit-learn": "1.9.0",
+    "numpy": "2.5.2",
+    "pandas": "3.0.5",
+    "joblib": "1.5.3"
+  },
+  "evaluated_at": "2026-11-22T10:17:44+07:00",
+  "test_metrics": {
+    "accuracy": 0.9818181818181818,
+    "precision_macro": 0.9823479152426521,
+    "recall_macro": 0.9818181818181817,
+    "f1_macro": 0.9816900365359928
+  }
+}

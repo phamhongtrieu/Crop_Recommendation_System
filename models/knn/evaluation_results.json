@@ -1,0 +1,169 @@
+{
+  "model_name": "KNN",
+  "evaluated_at": "2026-11-22T10:17:44+07:00",
+  "tables": {
+    "Tong_hop": [
+      {
+        "Model": "KNN",
+        "Configuration": "GridSearch",
+        "CV_accuracy_mean": 0.9755681818181818,
+        "CV_f1_macro_mean": 0.975439735575082,
+        "CV_f1_macro_std": 0.011259504293579359,
+        "Test_accuracy": 0.9818181818181818,
+        "Test_precision_macro": 0.9823479152426521,
+        "Test_recall_macro": 0.9818181818181817,
+        "Test_f1_macro": 0.9816900365359928,
+        "Train_f1_macro": 1.0,
+        "CV_train_validation_gap_F1": 0.024560264424917988,
+        "Preprocessing": "StandardScaler",
+        "Best_grid_parameters": "{\"knn__n_neighbors\": 5, \"knn__p\": 1, \"knn__weights\": \"distance\"}"
+      }
+    ],
+    "GridSearch": [
+      {
+        "Model": "KNN",
+        "Candidate": 1,
+        "Parameters": "{\"knn__n_neighbors\": 3, \"knn__p\": 1, \"knn__weights\": \"uniform\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9727272727272727,
+        "CV_f1_macro_mean": 0.9726403855899939,
+        "CV_f1_macro_std": 0.011955829003489743
+      },
+      {
+        "Model": "KNN",
+        "Candidate": 2,
+        "Parameters": "{\"knn__n_neighbors\": 3, \"knn__p\": 1, \"knn__weights\": \"distance\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9732954545454545,
+        "CV_f1_macro_mean": 0.9731919051847686,
+        "CV_f1_macro_std": 0.011832525920278426
+      },
+      {
+        "Model": "KNN",
+        "Candidate": 3,
+        "Parameters": "{\"knn__n_neighbors\": 3, \"knn__p\": 2, \"knn__weights\": \"uniform\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9642045454545454,
+        "CV_f1_macro_mean": 0.9640033284070701,
+        "CV_f1_macro_std": 0.008833875226055268
+      },
+      {
+        "Model": "KNN",
+        "Candidate": 4,
+        "Parameters": "{\"knn__n_neighbors\": 3, \"knn__p\": 2, \"knn__weights\": \"distance\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9676136363636363,
+        "CV_f1_macro_mean": 0.9674316924212976,
+        "CV_f1_macro_std": 0.00923651013410179
+      },
+      {
+        "Model": "KNN",
+        "Candidate": 5,
+        "Parameters": "{\"knn__n_neighbors\": 5, \"knn__p\": 1, \"knn__weights\": \"uniform\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9732954545454546,
+        "CV_f1_macro_mean": 0.973045765657601,
+        "CV_f1_macro_std": 0.010786176968047815
+      },
+      {
+        "Model": "KNN",
+        "Candidate": 6,
+        "Parameters": "{\"knn__n_neighbors\": 5, \"knn__p\": 1, \"knn__weights\": \"distance\"}",
+        "Selected": true,
+        "CV_accuracy_mean": 0.9755681818181818,
+        "CV_f1_macro_mean": 0.975439735575082,
+        "CV_f1_macro_std": 0.011259504293579359
+      },
+      {
+        "Model": "KNN",
+        "Candidate": 7,
+        "Parameters": "{\"knn__n_neighbors\": 5, \"knn__p\": 2, \"knn__weights\": \"uniform\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.965340909090909,
+        "CV_f1_macro_mean": 0.9650112202843848,
+        "CV_f1_macro_std": 0.012438852654645446
+      },
+      {
+        "Model": "KNN",
+        "Candidate": 8,
+        "Parameters": "{\"knn__n_neighbors\": 5, \"knn__p\": 2, \"knn__weights\": \"distance\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9681818181818181,
+        "CV_f1_macro_mean": 0.9679515243952987,
+        "CV_f1_macro_std": 0.01208100801859229
+      },
+      {
+        "Model": "KNN",
+        "Candidate": 9,
+        "Parameters": "{\"knn__n_neighbors\": 11, \"knn__p\": 1, \"knn__weights\": \"uniform\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9664772727272727,
+        "CV_f1_macro_mean": 0.9661658021558029,
+        "CV_f1_macro_std": 0.011379841727138384
+      },
+      {
+        "Model": "KNN",
+        "Candidate": 10,
+        "Parameters": "{\"knn__n_neighbors\": 11, \"knn__p\": 1, \"knn__weights\": \"distance\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9698863636363637,
+        "CV_f1_macro_mean": 0.96968083965566,
+        "CV_f1_macro_std": 0.00954834819280275
+      },
+      {
+        "Model": "KNN",
+        "Candidate": 11,
+        "Parameters": "{\"knn__n_neighbors\": 11, \"knn__p\": 2, \"knn__weights\": \"uniform\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.953409090909091,
+        "CV_f1_macro_mean": 0.9526874325055272,
+        "CV_f1_macro_std": 0.008577641811070654
+      },
+      {
+        "Model": "KNN",
+        "Candidate": 12,
+        "Parameters": "{\"knn__n_neighbors\": 11, \"knn__p\": 2, \"knn__weights\": \"distance\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9602272727272727,
+        "CV_f1_macro_mean": 0.9598212200843095,
+        "CV_f1_macro_std": 0.01147147451955841
+      },
+      {
+        "Model": "KNN",
+        "Candidate": 13,
+        "Parameters": "{\"knn__n_neighbors\": 21, \"knn__p\": 1, \"knn__weights\": \"uniform\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9579545454545453,
+        "CV_f1_macro_mean": 0.9572798239576032,
+        "CV_f1_macro_std": 0.005735606078563573
+      },
+      {
+        "Model": "KNN",
+        "Candidate": 14,
+        "Parameters": "{\"knn__n_neighbors\": 21, \"knn__p\": 1, \"knn__weights\": \"distance\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9636363636363636,
+        "CV_f1_macro_mean": 0.9632200879886901,
+        "CV_f1_macro_std": 0.00843646423499802
+      },
+      {
+        "Model": "KNN",
+        "Candidate": 15,
+        "Parameters": "{\"knn__n_neighbors\": 21, \"knn__p\": 2, \"knn__weights\": \"uniform\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9363636363636363,
+        "CV_f1_macro_mean": 0.9346438543308423,
+        "CV_f1_macro_std": 0.012314189364346322
+      },
+      {
+        "Model": "KNN",
+        "Candidate": 16,
+        "Parameters": "{\"knn__n_neighbors\": 21, \"knn__p\": 2, \"knn__weights\": \"distance\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9494318181818182,
+        "CV_f1_macro_mean": 0.9488785832641184,
+        "CV_f1_macro_std": 0.010265138026099766
+      }
+    ]
+  }
+}

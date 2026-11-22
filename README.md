@@ -6,7 +6,7 @@
 Dataset gồm **2.200 mẫu, 22 loại cây**, mỗi loại 100 mẫu. Dữ liệu được chia có
 phân tầng theo nhãn: **1.760 mẫu train và 440 mẫu test**, `random_state=42`.
 
-Hiện đã huấn luyện **Softmax, Decision Tree và Random Forest**. Các thư mục KNN,
+Hiện đã huấn luyện **Softmax, Decision Tree, KNN và Random Forest**. Các thư mục
 Naive Bayes và SVM đang để trống. Backend hiện sử dụng **Softmax** tại
 `models/softmax/model.joblib`.
 
@@ -41,7 +41,14 @@ models/
     evaluation_results.json
     best_decision_tree.png
     best_decision_tree.svg
-  knn/                              # Chỉ có .gitkeep
+  knn/
+    train.py
+    evaluate.ipynb
+    export_excel.py
+    model.joblib
+    training_results.joblib
+    model_metadata.json
+    evaluation_results.json
   naive_bayes/                      # Chỉ có .gitkeep
   svm/                              # Chỉ có .gitkeep
   random_forest/
@@ -233,6 +240,29 @@ Phần 6 vẽ toàn bộ cây có siêu tham số tốt nhất và lưu
 [PNG](models/decision_tree/best_decision_tree.png) cùng
 [SVG](models/decision_tree/best_decision_tree.svg). Mở SVG để phóng to từng nút.
 
+### KNN
+
+```powershell
+python -m models.knn.train
+```
+
+KNN dùng `Pipeline(StandardScaler, KNeighborsClassifier)`. StandardScaler được
+fit riêng trên train của từng fold; pipeline đã lưu nhận đặc trưng gốc và tự
+chuẩn hóa khi dự đoán. Lưới tham số gồm **16 tổ hợp**, tương ứng **80 lượt fit CV**:
+
+```python
+param_grid = {
+    "knn__n_neighbors": [3, 5, 11, 21],
+    "knn__weights": ["uniform", "distance"],
+    "knn__p": [1, 2],
+}
+```
+
+`p=1` dùng khoảng cách Manhattan, `p=2` dùng khoảng cách Euclidean.
+Sau khi train, chạy **Run All** trong
+[evaluate.ipynb của KNN](models/knn/evaluate.ipynb) để xem siêu tham số tốt nhất,
+bảng tổng hợp, toàn bộ kết quả GridSearch và lưu metadata cùng kết quả JSON.
+
 ### Random Forest
 
 ```powershell
@@ -272,7 +302,7 @@ Mỗi thuật toán lưu kết quả trong thư mục riêng:
 | `train.py` | Tìm siêu tham số, fit và lưu mô hình tốt nhất |
 | `evaluate.ipynb` | Đánh giá mô hình, xem bảng kết quả và lưu JSON |
 | `export_excel.py` | Tổng hợp các kết quả đã đánh giá vào Excel chung |
-| `model.joblib` | Mô hình tốt nhất đã fit; Softmax lưu cả scaler trong pipeline |
+| `model.joblib` | Mô hình tốt nhất đã fit; Softmax và KNN lưu cả scaler trong pipeline |
 | `training_results.joblib` | Dictionary gồm `search` (GridSearchCV đã fit), `finished_at`, `versions` |
 | `model_metadata.json` | Đặc trưng, nhãn, tham số, phiên bản thư viện và điểm CV/test |
 | `evaluation_results.json` | Hai bảng `Tong_hop` và `GridSearch`; Random Forest lưu thêm Feature Importance |
@@ -284,7 +314,8 @@ python -m models.reporting
 ```
 
 Các lệnh `python -m models.softmax.export_excel`,
-`python -m models.decision_tree.export_excel` và
+`python -m models.decision_tree.export_excel`,
+`python -m models.knn.export_excel` và
 `python -m models.random_forest.export_excel` đều xuất cùng báo cáo.
 Kết quả nằm tại [models/model_evaluation_results.xlsx](models/model_evaluation_results.xlsx):
 
@@ -292,7 +323,7 @@ Kết quả nằm tại [models/model_evaluation_results.xlsx](models/model_eval
 | --- | --- |
 | `Tong_hop` | Một dòng cho mỗi mô hình tốt nhất đã đánh giá, gồm 13 cột |
 | `Tieu_chi` | Giải thích các cột tổng hợp |
-| `GridSearch` | Các cấu hình đã thử, điểm CV, độ lệch chuẩn, thứ hạng và cột `Selected` |
+| `GridSearch` | Các cấu hình đã thử, điểm CV, độ lệch chuẩn và cột `Selected` |
 
 Chỉ các thư mục có `evaluation_results.json` mới được tổng hợp. Chạy lại train
 sẽ ghi đè model/checkpoint và xóa metadata cùng kết quả JSON cũ của thuật toán;
@@ -308,11 +339,13 @@ Các chỉ số dưới đây lấy từ `model_metadata.json` của từng thu�
 | --- | ---: | ---: | ---: |
 | Softmax | 97,76% | 98,41% | 98,40% |
 | Decision Tree | 98,47% | 97,95% | 97,94% |
+| KNN | 97,54% | 98,18% | 98,17% |
 | Random Forest | 99,43% | 99,55% | 99,55% |
 
 Softmax được chọn với `C=100`. Decision Tree được chọn với `criterion="gini"`,
 `max_depth=12`, `min_samples_split=2`, `min_samples_leaf=1`, `ccp_alpha=0.0`;
 cây đã fit có độ sâu 12, 32 lá và 63 nút.
+KNN được chọn với `knn__n_neighbors=5`, `knn__weights="distance"`, `knn__p=1`.
 Random Forest được chọn với `n_estimators=100`, `max_depth=20`,
 `min_samples_leaf=1`, `max_features="sqrt"`, `criterion="entropy"`.
 Theo Feature Importance (MDI), ba đặc trưng có độ quan trọng cao nhất trong rừng
