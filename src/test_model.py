@@ -69,13 +69,17 @@ class TestCropModel(unittest.TestCase):
         grid_results = self.search.cv_results_
         grid_rows = result["tables"]["GridSearch"]
         self.assertEqual(len(grid_rows), len(grid_results["params"]))
+        grid_columns = [
+            "Model", "Candidate", "Parameters", "Selected",
+            "CV_accuracy_mean", "CV_f1_macro_mean", "CV_f1_macro_std",
+        ]
         for i, candidate in enumerate(grid_rows):
+            self.assertEqual(list(candidate), grid_columns)
             self.assertEqual(candidate["Candidate"], i + 1)
             self.assertEqual(json.loads(candidate["Parameters"]), grid_results["params"][i])
             self.assertAlmostEqual(candidate["CV_accuracy_mean"], grid_results["mean_test_accuracy"][i])
             self.assertAlmostEqual(candidate["CV_f1_macro_mean"], grid_results["mean_test_f1_macro"][i])
             self.assertAlmostEqual(candidate["CV_f1_macro_std"], grid_results["std_test_f1_macro"][i])
-            self.assertEqual(candidate["Rank_CV_F1_macro"], grid_results["rank_test_f1_macro"][i])
         with pd.ExcelFile(PROJECT_DIR / "models" / "model_evaluation_results.xlsx") as workbook:
             self.assertEqual(workbook.sheet_names, ["Tong_hop", "Tieu_chi", "GridSearch"])
             summary = pd.read_excel(workbook, sheet_name="Tong_hop")
