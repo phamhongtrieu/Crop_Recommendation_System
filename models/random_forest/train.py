@@ -13,11 +13,11 @@ X_train, y_train = read_split("train")
 # 2. Khai báo lưới siêu tham số cần thử.
 model = RandomForestClassifier(random_state=42, n_jobs=1)
 param_grid = {
-    "n_estimators": [100, 300],
+    "n_estimators": [100, 200, 300],
     "max_depth": [10, 20],
     "min_samples_leaf": [1, 3],
     "max_features": ["sqrt"],
-    "criterion": ["gini", "entropy"],
+    "criterion": ["entropy"],
 }
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 

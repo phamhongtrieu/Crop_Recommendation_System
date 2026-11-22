@@ -1,101 +1,29 @@
 {
   "model_name": "Decision Tree",
-  "evaluated_at": "2026-11-20T20:27:15+07:00",
+  "evaluated_at": "2026-11-22T10:44:38+07:00",
   "tables": {
     "Tong_hop": [
       {
         "Model": "Decision Tree",
         "Configuration": "GridSearch",
-        "CV_accuracy_mean": 0.9846590909090909,
-        "CV_f1_macro_mean": 0.9847057682457606,
-        "CV_f1_macro_std": 0.005841431646461538,
-        "Test_accuracy": 0.9795454545454545,
-        "Test_precision_macro": 0.9810114128295947,
-        "Test_recall_macro": 0.9795454545454544,
-        "Test_f1_macro": 0.9794117592577155,
-        "Train_f1_macro": 0.9942959001782531,
-        "CV_train_validation_gap_F1": 0.010876818291209456,
+        "CV_accuracy_mean": 0.9818181818181818,
+        "CV_f1_macro_mean": 0.9817372600958494,
+        "CV_f1_macro_std": 0.005927019109494394,
+        "Test_accuracy": 0.9863636363636363,
+        "Test_precision_macro": 0.9874065328610784,
+        "Test_recall_macro": 0.9863636363636363,
+        "Test_f1_macro": 0.9862103514221615,
+        "Train_f1_macro": 0.9988636363636364,
+        "CV_train_validation_gap_F1": 0.016131511692155875,
         "Preprocessing": "None (raw features)",
-        "Best_grid_parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"gini\", \"max_depth\": 12, \"min_samples_leaf\": 1, \"min_samples_split\": 2}"
+        "Best_grid_parameters": "{\"criterion\": \"entropy\", \"max_depth\": 12, \"min_samples_leaf\": 1, \"min_samples_split\": 10}"
       }
     ],
     "GridSearch": [
       {
         "Model": "Decision Tree",
         "Candidate": 1,
-        "Parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"gini\", \"max_depth\": 8, \"min_samples_leaf\": 1, \"min_samples_split\": 2}",
-        "Selected": false,
-        "CV_accuracy_mean": 0.871590909090909,
-        "CV_f1_macro_mean": 0.8445973144279286,
-        "CV_f1_macro_std": 0.0346110847378921
-      },
-      {
-        "Model": "Decision Tree",
-        "Candidate": 2,
-        "Parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"gini\", \"max_depth\": 8, \"min_samples_leaf\": 1, \"min_samples_split\": 10}",
-        "Selected": false,
-        "CV_accuracy_mean": 0.871590909090909,
-        "CV_f1_macro_mean": 0.8445973144279286,
-        "CV_f1_macro_std": 0.0346110847378921
-      },
-      {
-        "Model": "Decision Tree",
-        "Candidate": 3,
-        "Parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"gini\", \"max_depth\": 8, \"min_samples_leaf\": 3, \"min_samples_split\": 2}",
-        "Selected": false,
-        "CV_accuracy_mean": 0.8710227272727273,
-        "CV_f1_macro_mean": 0.8440285772023,
-        "CV_f1_macro_std": 0.03513265867474129
-      },
-      {
-        "Model": "Decision Tree",
-        "Candidate": 4,
-        "Parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"gini\", \"max_depth\": 8, \"min_samples_leaf\": 3, \"min_samples_split\": 10}",
-        "Selected": false,
-        "CV_accuracy_mean": 0.8710227272727273,
-        "CV_f1_macro_mean": 0.8440285772023,
-        "CV_f1_macro_std": 0.03513265867474129
-      },
-      {
-        "Model": "Decision Tree",
-        "Candidate": 5,
-        "Parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"gini\", \"max_depth\": 12, \"min_samples_leaf\": 1, \"min_samples_split\": 2}",
-        "Selected": true,
-        "CV_accuracy_mean": 0.9846590909090909,
-        "CV_f1_macro_mean": 0.9847057682457606,
-        "CV_f1_macro_std": 0.005841431646461538
-      },
-      {
-        "Model": "Decision Tree",
-        "Candidate": 6,
-        "Parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"gini\", \"max_depth\": 12, \"min_samples_leaf\": 1, \"min_samples_split\": 10}",
-        "Selected": false,
-        "CV_accuracy_mean": 0.984659090909091,
-        "CV_f1_macro_mean": 0.9846776356917527,
-        "CV_f1_macro_std": 0.002905952678631511
-      },
-      {
-        "Model": "Decision Tree",
-        "Candidate": 7,
-        "Parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"gini\", \"max_depth\": 12, \"min_samples_leaf\": 3, \"min_samples_split\": 2}",
-        "Selected": false,
-        "CV_accuracy_mean": 0.9801136363636364,
-        "CV_f1_macro_mean": 0.9801471298794586,
-        "CV_f1_macro_std": 0.00741783270905962
-      },
-      {
-        "Model": "Decision Tree",
-        "Candidate": 8,
-        "Parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"gini\", \"max_depth\": 12, \"min_samples_leaf\": 3, \"min_samples_split\": 10}",
-        "Selected": false,
-        "CV_accuracy_mean": 0.9789772727272729,
-        "CV_f1_macro_mean": 0.979027428466502,
-        "CV_f1_macro_std": 0.007303040459515519
-      },
-      {
-        "Model": "Decision Tree",
-        "Candidate": 9,
-        "Parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"entropy\", \"max_depth\": 8, \"min_samples_leaf\": 1, \"min_samples_split\": 2}",
+        "Parameters": "{\"criterion\": \"entropy\", \"max_depth\": 8, \"min_samples_leaf\": 1, \"min_samples_split\": 2}",
         "Selected": false,
         "CV_accuracy_mean": 0.977840909090909,
         "CV_f1_macro_mean": 0.9775364843546381,
@@ -103,8 +31,8 @@
       },
       {
         "Model": "Decision Tree",
-        "Candidate": 10,
-        "Parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"entropy\", \"max_depth\": 8, \"min_samples_leaf\": 1, \"min_samples_split\": 10}",
+        "Candidate": 2,
+        "Parameters": "{\"criterion\": \"entropy\", \"max_depth\": 8, \"min_samples_leaf\": 1, \"min_samples_split\": 10}",
         "Selected": false,
         "CV_accuracy_mean": 0.9778409090909091,
         "CV_f1_macro_mean": 0.9775192667237841,
@@ -112,8 +40,8 @@
       },
       {
         "Model": "Decision Tree",
-        "Candidate": 11,
-        "Parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"entropy\", \"max_depth\": 8, \"min_samples_leaf\": 3, \"min_samples_split\": 2}",
+        "Candidate": 3,
+        "Parameters": "{\"criterion\": \"entropy\", \"max_depth\": 8, \"min_samples_leaf\": 3, \"min_samples_split\": 2}",
         "Selected": false,
         "CV_accuracy_mean": 0.9767045454545455,
         "CV_f1_macro_mean": 0.9763956643902885,
@@ -121,8 +49,8 @@
       },
       {
         "Model": "Decision Tree",
-        "Candidate": 12,
-        "Parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"entropy\", \"max_depth\": 8, \"min_samples_leaf\": 3, \"min_samples_split\": 10}",
+        "Candidate": 4,
+        "Parameters": "{\"criterion\": \"entropy\", \"max_depth\": 8, \"min_samples_leaf\": 3, \"min_samples_split\": 10}",
         "Selected": false,
         "CV_accuracy_mean": 0.9778409090909091,
         "CV_f1_macro_mean": 0.9775142549883513,
@@ -130,8 +58,8 @@
       },
       {
         "Model": "Decision Tree",
-        "Candidate": 13,
-        "Parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"entropy\", \"max_depth\": 12, \"min_samples_leaf\": 1, \"min_samples_split\": 2}",
+        "Candidate": 5,
+        "Parameters": "{\"criterion\": \"entropy\", \"max_depth\": 12, \"min_samples_leaf\": 1, \"min_samples_split\": 2}",
         "Selected": false,
         "CV_accuracy_mean": 0.9806818181818182,
         "CV_f1_macro_mean": 0.9806077321287254,
@@ -139,17 +67,17 @@
       },
       {
         "Model": "Decision Tree",
-        "Candidate": 14,
-        "Parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"entropy\", \"max_depth\": 12, \"min_samples_leaf\": 1, \"min_samples_split\": 10}",
-        "Selected": false,
+        "Candidate": 6,
+        "Parameters": "{\"criterion\": \"entropy\", \"max_depth\": 12, \"min_samples_leaf\": 1, \"min_samples_split\": 10}",
+        "Selected": true,
         "CV_accuracy_mean": 0.9818181818181818,
         "CV_f1_macro_mean": 0.9817372600958494,
         "CV_f1_macro_std": 0.005927019109494394
       },
       {
         "Model": "Decision Tree",
-        "Candidate": 15,
-        "Parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"entropy\", \"max_depth\": 12, \"min_samples_leaf\": 3, \"min_samples_split\": 2}",
+        "Candidate": 7,
+        "Parameters": "{\"criterion\": \"entropy\", \"max_depth\": 12, \"min_samples_leaf\": 3, \"min_samples_split\": 2}",
         "Selected": false,
         "CV_accuracy_mean": 0.9767045454545455,
         "CV_f1_macro_mean": 0.9765874329473592,
@@ -157,8 +85,8 @@
       },
       {
         "Model": "Decision Tree",
-        "Candidate": 16,
-        "Parameters": "{\"ccp_alpha\": 0.0, \"criterion\": \"entropy\", \"max_depth\": 12, \"min_samples_leaf\": 3, \"min_samples_split\": 10}",
+        "Candidate": 8,
+        "Parameters": "{\"criterion\": \"entropy\", \"max_depth\": 12, \"min_samples_leaf\": 3, \"min_samples_split\": 10}",
         "Selected": false,
         "CV_accuracy_mean": 0.9789772727272729,
         "CV_f1_macro_mean": 0.9788569304557733,

@@ -4,11 +4,10 @@
   "estimator": "DecisionTreeClassifier",
   "configuration": "GridSearch",
   "parameters": {
-    "ccp_alpha": 0.0,
-    "criterion": "gini",
+    "criterion": "entropy",
     "max_depth": 12,
     "min_samples_leaf": 1,
-    "min_samples_split": 2
+    "min_samples_split": 10
   },
   "preprocessing": "None (raw features)",
   "input_format": "Unscaled feature values in the order listed in features",
@@ -46,13 +45,13 @@
     "watermelon"
   ],
   "selection_metric": "CV_f1_macro_mean",
-  "cv_f1_macro_mean": 0.9847057682457606,
-  "cv_f1_macro_std": 0.005841431646461538,
+  "cv_f1_macro_mean": 0.9817372600958494,
+  "cv_f1_macro_std": 0.005927019109494394,
   "train_samples": 1760,
   "test_samples": 440,
   "n_splits": 5,
   "cv_method": "StratifiedKFold(n_splits=5, random_state=42, shuffle=True)",
-  "training_finished_at": "2026-11-20T20:26:33+07:00",
+  "training_finished_at": "2026-11-22T10:43:53+07:00",
   "versions": {
     "Python": "3.12.9",
     "scikit-learn": "1.9.0",
@@ -60,18 +59,18 @@
     "pandas": "3.0.5",
     "joblib": "1.5.3"
   },
-  "evaluated_at": "2026-11-20T20:27:15+07:00",
+  "evaluated_at": "2026-11-22T10:44:38+07:00",
   "tree": {
-    "depth": 12,
-    "leaves": 32,
-    "node_count": 63,
+    "depth": 11,
+    "leaves": 40,
+    "node_count": 79,
     "visualization_png": "best_decision_tree.png",
     "visualization_svg": "best_decision_tree.svg"
   },
   "test_metrics": {
-    "accuracy": 0.9795454545454545,
-    "precision_macro": 0.9810114128295947,
-    "recall_macro": 0.9795454545454544,
-    "f1_macro": 0.9794117592577155
+    "accuracy": 0.9863636363636363,
+    "precision_macro": 0.9874065328610784,
+    "recall_macro": 0.9863636363636363,
+    "f1_macro": 0.9862103514221615
   }
 }
