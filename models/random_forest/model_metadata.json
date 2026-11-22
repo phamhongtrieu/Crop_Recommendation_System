@@ -52,7 +52,7 @@
   "test_samples": 440,
   "n_splits": 5,
   "cv_method": "StratifiedKFold(n_splits=5, random_state=42, shuffle=True)",
-  "training_finished_at": "2026-11-20T21:13:24+07:00",
+  "training_finished_at": "2026-11-22T10:46:13+07:00",
   "versions": {
     "Python": "3.12.9",
     "scikit-learn": "1.9.0",
@@ -60,7 +60,7 @@
     "pandas": "3.0.5",
     "joblib": "1.5.3"
   },
-  "evaluated_at": "2026-11-20T21:14:20+07:00",
+  "evaluated_at": "2026-11-22T10:46:44+07:00",
   "feature_importance": {
     "method": "mean_decrease_in_impurity",
     "source": "RandomForestClassifier.feature_importances_",

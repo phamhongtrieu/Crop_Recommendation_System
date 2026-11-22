@@ -13,11 +13,10 @@ X_train, y_train = read_split("train")
 # 2. Khai báo đúng lưới siêu tham số cần thử.
 model = DecisionTreeClassifier(random_state=42)
 param_grid = {
-    "criterion": ["gini", "entropy"],
+    "criterion": ["entropy"],
     "max_depth": [8, 12],
     "min_samples_split": [2, 10],
     "min_samples_leaf": [1, 3],
-    "ccp_alpha": [0.0],
 }
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 

@@ -222,15 +222,14 @@ python -m models.decision_tree.train
 ```
 
 DecisionTreeClassifier dùng `random_state=42` và nhận đặc trưng gốc.
-Lưới tham số hiện tại gồm **16 tổ hợp**:
+Lưới tham số hiện tại gồm **8 tổ hợp**:
 
 ```python
 param_grid = {
-    "criterion": ["gini", "entropy"],
+    "criterion": ["entropy"],
     "max_depth": [8, 12],
     "min_samples_split": [2, 10],
     "min_samples_leaf": [1, 3],
-    "ccp_alpha": [0.0],
 }
 ```
 
@@ -270,15 +269,15 @@ python -m models.random_forest.train
 ```
 
 RandomForestClassifier dùng `random_state=42`, nhận đặc trưng gốc và thử
-**16 tổ hợp** tham số:
+**12 tổ hợp** tham số:
 
 ```python
 param_grid = {
-    "n_estimators": [100, 300],
+    "n_estimators": [100, 200, 300],
     "max_depth": [10, 20],
     "min_samples_leaf": [1, 3],
     "max_features": ["sqrt"],
-    "criterion": ["gini", "entropy"],
+    "criterion": ["entropy"],
 }
 ```
 
@@ -338,13 +337,13 @@ Các chỉ số dưới đây lấy từ `model_metadata.json` của từng thu�
 | Mô hình | CV F1-macro | Test Accuracy | Test F1-macro |
 | --- | ---: | ---: | ---: |
 | Softmax | 97,76% | 98,41% | 98,40% |
-| Decision Tree | 98,47% | 97,95% | 97,94% |
+| Decision Tree | 98,17% | 98,64% | 98,62% |
 | KNN | 97,54% | 98,18% | 98,17% |
 | Random Forest | 99,43% | 99,55% | 99,55% |
 
-Softmax được chọn với `C=100`. Decision Tree được chọn với `criterion="gini"`,
-`max_depth=12`, `min_samples_split=2`, `min_samples_leaf=1`, `ccp_alpha=0.0`;
-cây đã fit có độ sâu 12, 32 lá và 63 nút.
+Softmax được chọn với `C=100`. Decision Tree được chọn với `criterion="entropy"`,
+`max_depth=12`, `min_samples_split=10`, `min_samples_leaf=1`;
+cây đã fit có độ sâu 11, 40 lá và 79 nút.
 KNN được chọn với `knn__n_neighbors=5`, `knn__weights="distance"`, `knn__p=1`.
 Random Forest được chọn với `n_estimators=100`, `max_depth=20`,
 `min_samples_leaf=1`, `max_features="sqrt"`, `criterion="entropy"`.
