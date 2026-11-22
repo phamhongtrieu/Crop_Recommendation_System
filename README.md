@@ -7,8 +7,8 @@ Dataset gồm **2.200 mẫu, 22 loại cây**, mỗi loại 100 mẫu. Dữ li�
 phân tầng theo nhãn: **1.760 mẫu train và 440 mẫu test**, `random_state=42`.
 
 Hiện đã huấn luyện **Softmax, Decision Tree, KNN, SVM và Random Forest**. Thư mục
-Naive Bayes đang để trống. Backend hiện sử dụng **Softmax** tại
-`models/softmax/model.joblib`.
+Naive Bayes đang để trống. Backend hiện sử dụng **Random Forest** tại
+`models/random_forest/model.joblib`.
 
 ## Cấu trúc thư mục
 
@@ -70,6 +70,7 @@ models/
     feature_importance.png
     feature_importance.svg
 src/
+  input_config.py                   # Min/Max từ CSV raw, dùng chung cho Frontend/Backend
   preprocessing.py                  # Làm sạch và chia dữ liệu
   download_data.py                   # Tải dataset
   test_model.py                      # Kiểm tra Softmax, checkpoint và Excel
@@ -123,8 +124,21 @@ lockfile đầy đủ; quy trình cài mới toàn bộ môi trường chưa đ�
 
 ## Chạy ứng dụng
 
-Backend nạp `models/softmax/model.joblib` một lần khi khởi động. Nếu dùng model
+Backend nạp `models/random_forest/model.joblib` một lần khi khởi động. Nếu dùng model
 được bàn giao, có thể chạy ứng dụng ngay mà không cần train lại.
+
+Trên Windows, nhấp đúp `run_app.bat` ở thư mục gốc để mở Backend và Frontend
+trong hai cửa sổ riêng, dùng Python từ `.venv` có sẵn. Hoặc chạy từ PowerShell:
+
+```powershell
+.\run_app.bat
+```
+
+File chờ hai dịch vụ sẵn sàng rồi tự mở <http://localhost:8501> trong trình
+duyệt; nếu dịch vụ đã chạy thì dùng lại. Cửa sổ khởi chạy giữ thông báo để
+đọc lỗi nếu có. Nhấn `Ctrl+C` trong từng cửa sổ dịch vụ để dừng.
+Nhấp đúp file bằng File Explorer của Windows; trong VS Code, mở Terminal
+và chạy `.\run_app.bat`. Nếu muốn chạy riêng từng dịch vụ, dùng các lệnh dưới đây.
 
 Terminal 1, tại thư mục gốc và trong môi trường đã kích hoạt:
 
@@ -149,23 +163,35 @@ trả HTTP 503 với đầu vào hợp lệ. Khởi động lại Backend sau kh
 
 URL Backend mặc định trên Frontend là `http://127.0.0.1:8000`. Nút Random chỉ
 điền dữ liệu mẫu; nhấn **Dự đoán** để gửi yêu cầu tới API.
+Giao diện tập trung vào form và kết quả, không có sidebar cấu hình. Khi cần đổi
+địa chỉ Backend, đặt biến môi trường `CROP_API_URL` trước khi chạy Frontend.
 
 ## Đầu vào và kết quả API
 
 `POST /predict` nhận đúng bảy trường số JSON sau. Hai đầu khoảng đều được chấp
 nhận; trường thừa, chuỗi số, boolean, null, NaN và Infinity bị từ chối với HTTP 422.
 
-| Trường | Phạm vi demo |
-| --- | --- |
-| N | 0–140 |
-| P | 0–145 |
-| K | 0–205 |
-| temperature | 0–50 °C |
-| humidity | 0–100% |
-| ph | 0–14 |
-| rainfall | 0–300 mm |
+| Input | Min | Max | Step |
+| --- | ---: | ---: | ---: |
+| Nitrogen (N) | 0 | 140 | 1 |
+| Phosphorus (P) | 5 | 145 | 1 |
+| Potassium (K) | 5 | 205 | 1 |
+| Temperature (°C) | 8.825674745 | 43.67549305 | 0.01 |
+| Humidity (%) | 14.25803981 | 99.98187601 | 0.01 |
+| pH | 3.504752314 | 9.93509073 | 0.01 |
+| Rainfall (mm) | 20.21126747 | 298.5601175 | 0.01 |
 
-Đây là phạm vi hỗ trợ demo. Đơn vị N/P/K và chu kỳ tổng hợp rainfall chưa được
+Mỗi ô nhập có slider bên dưới và hiển thị khoảng giá trị cho phép. Ô nhập số và
+slider đồng bộ hai chiều; thay đổi giá trị sẽ xóa kết quả dự đoán cũ.
+Giá trị ngoài khoảng hoặc không hữu hạn sẽ được báo lỗi và chặn nút **Dự đoán**.
+`Step` là bước tăng/giảm của ô số và slider. Min/Max được chấp nhận ở cả hai đầu
+và được kiểm tra tại Frontend lẫn Backend. Random chỉ chọn dòng CSV nằm trong
+range hiện tại, giữ nguyên các giá trị của dòng được chọn.
+Min/Max được tính trực tiếp từ toàn bộ `data/raw/Crop_recommendation.csv` bằng
+`src/input_config.py`, giữ nguyên độ chính xác của CSV và dùng chung cho Frontend/Backend.
+CSV raw cần có khi khởi động ứng dụng; khởi động lại sau khi thay dữ liệu raw.
+
+Đây là phạm vi quan sát trong dữ liệu raw. Đơn vị N/P/K và chu kỳ tổng hợp rainfall chưa được
 xác minh từ nguồn dataset; Frontend gửi nguyên giá trị đầu vào.
 
 Ví dụ gọi API bằng PowerShell, sau khi Backend đã chạy:
@@ -178,11 +204,14 @@ $body = @{
 Invoke-RestMethod -Uri http://127.0.0.1:8000/predict -Method Post -ContentType application/json -Body $body
 ```
 
-Mẫu này được Softmax hiện tại dự đoán là `rice`. Kết quả gồm
+Mẫu này được Random Forest hiện tại dự đoán là `rice`. Kết quả gồm
 `recommended_crop` và `top_3`, mỗi phần tử có `crop` và `probability`.
-Backend truyền dữ liệu gốc vào pipeline Softmax; pipeline tự chuẩn hóa bằng
-StandardScaler. Xác suất Top 3 lấy trực tiếp từ `predict_proba`, không chuẩn hóa
-riêng tổng Top 3 và không phải tỷ lệ đảm bảo cây trồng sẽ phát triển tốt.
+Backend truyền 7 đặc trưng gốc vào Random Forest. Giao diện hiển thị điểm lấy từ
+`probability` với nhãn **Xác suất dự đoán**,
+dưới dạng phần trăm cho cây được đề xuất và Top 3. Giá trị lấy trực tiếp từ
+`predict_proba`, không chuẩn hóa riêng tổng Top 3 và không phải tỷ lệ đảm bảo
+cây trồng sẽ phát triển tốt. Chú thích trên giao diện: “Giá trị do mô hình ước lượng,
+không phải tỷ lệ trồng thành công.” Trường JSON `probability` vẫn giữ nguyên.
 
 ## Chuẩn bị dữ liệu
 
@@ -349,7 +378,7 @@ Kết quả nằm tại [models/model_evaluation_results.xlsx](models/model_eval
 
 | Sheet | Nội dung |
 | --- | --- |
-| `Tong_hop` | Một dòng cho mỗi mô hình tốt nhất đã đánh giá, gồm 13 cột |
+| `Tong_hop` | Bảng 13 cột cho các mô hình; bên dưới là lý do chọn Random Forest để dự đoán |
 | `Tieu_chi` | Giải thích các cột tổng hợp |
 | `GridSearch` | Các cấu hình đã thử, điểm CV, độ lệch chuẩn và cột `Selected` |
 
@@ -358,6 +387,8 @@ sẽ ghi đè model/checkpoint và xóa metadata cùng kết quả JSON cũ củ
 Decision Tree còn xóa hình cây cũ; Random Forest xóa bảng và hình Feature Importance cũ.
 Sau đó cần chạy lại notebook và xuất Excel.
 Đóng file Excel trước khi xuất báo cáo.
+Phần lý do chọn mô hình được tạo lại mỗi lần xuất Excel từ các chỉ số đã lưu,
+gồm kết quả CV/test, độ ổn định, khoảng cách train/validation và khả năng tích hợp.
 
 ### Kết quả đã lưu
 

@@ -5,8 +5,7 @@ import json
 import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
-from sklearn.naive_bayes import GaussianNB
-from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestClassifier
 
 from backend.app import create_app
 from backend.model_service import FEATURE_NAMES, MODEL_PATH
@@ -20,7 +19,7 @@ SAMPLE = {
 @pytest.fixture(scope="module")
 def real_client():
     if not MODEL_PATH.is_file():
-        pytest.skip("Real-model integration requires models/crop_model.joblib")
+        pytest.skip("Real-model integration requires models/random_forest/model.joblib")
     with TestClient(create_app()) as client:
         yield client
 
@@ -29,15 +28,14 @@ def test_real_model_contract(real_client):
     metadata = json.loads(MODEL_PATH.with_name("model_metadata.json").read_text(encoding="utf-8"))
     service = real_client.app.state.model_service
     assert service.model_loaded
-    pipeline = service._model
-    assert isinstance(pipeline, Pipeline)
-    assert isinstance(pipeline.named_steps["model"], GaussianNB)
-    assert pipeline.named_steps["scaler"] == "passthrough"
+    model = service._model
+    assert MODEL_PATH.parent.name == "random_forest"
+    assert isinstance(model, RandomForestClassifier)
     assert metadata["model_file"] == MODEL_PATH.name
-    assert metadata["estimator"] == "GaussianNB"
+    assert metadata["estimator"] == "RandomForestClassifier"
     assert metadata["features"] == list(FEATURE_NAMES)
-    assert list(pipeline.named_steps["model"].feature_names_in_) == list(FEATURE_NAMES)
-    assert pipeline.classes_.tolist() == metadata["classes"]
+    assert list(model.feature_names_in_) == list(FEATURE_NAMES)
+    assert model.classes_.tolist() == metadata["classes"]
 
 
 def test_real_model_health(real_client):

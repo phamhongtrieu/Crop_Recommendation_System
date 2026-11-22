@@ -9,7 +9,7 @@ from openpyxl.formatting.rule import ColorScaleRule
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
-# Thêm thư mục gốc để chạy trực tiếp file bằng nút Run.
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from models.common import MODELS_DIR
@@ -31,6 +31,61 @@ CRITERIA = [
 ]
 SUMMARY_COLUMNS = [name for name, _ in CRITERIA]
 TABLE_NAMES = ("Tong_hop", "GridSearch")
+
+
+def add_model_selection_notes(sheet, summary: pd.DataFrame) -> None:
+    selected = summary.loc[summary["Model"] == "Random Forest"]
+    if selected.empty:
+        return
+    forest = selected.iloc[0]
+    forest_index = selected.index[0]
+
+    def percent(value):
+        return f"{value:.2%}".replace(".", ",")
+
+    def points(value):
+        return f"{value * 100:.2f}".replace(".", ",")
+
+    def rank(column, ascending=False):
+        position = int(summary[column].rank(method="min", ascending=ascending).loc[forest_index])
+        return f"{position}/{len(summary)}"
+
+    notes = [
+        ("Kết quả CV", f"CV F1-macro = {percent(forest['CV_f1_macro_mean'])}, "
+         f"xếp hạng {rank('CV_f1_macro_mean')}. F1-macro đánh giá đồng đều các loại cây."),
+        ("Độ ổn định CV", f"Độ lệch chuẩn F1-macro = {points(forest['CV_f1_macro_std'])} điểm phần trăm; "
+         f"xếp hạng {rank('CV_f1_macro_std', ascending=True)} theo mức dao động thấp nhất."),
+        ("Khoảng cách train/validation", f"Chênh lệch F1-macro trong CV = "
+         f"{points(forest['CV_train_validation_gap_F1'])} điểm phần trăm; "
+         f"xếp hạng {rank('CV_train_validation_gap_F1', ascending=True)} theo khoảng cách nhỏ nhất."),
+        ("Kết quả test", f"Accuracy = {percent(forest['Test_accuracy'])}; "
+         f"F1-macro = {percent(forest['Test_f1_macro'])}, xếp hạng {rank('Test_f1_macro')}. "
+        ),
+        ("Phù hợp với ứng dụng", "Có predict_proba để hiển thị Top 3; nhận 7 đặc trưng gốc "
+         "và có Feature Importance hỗ trợ trình bày mô hình."),
+        ("Cấu hình đã chọn", forest["Best_grid_parameters"]),
+    ]
+    start = len(summary) + 3
+    sheet.merge_cells(start_row=start, start_column=1, end_row=start, end_column=len(SUMMARY_COLUMNS))
+    heading = sheet.cell(start, 1, "Mô hình được chọn cho dự đoán: Random Forest")
+    heading.font = Font(name="Calibri", size=12, bold=True, color="FFFFFF")
+    heading.alignment = Alignment(vertical="center")
+    sheet.row_dimensions[start].height = 30
+    for cell in sheet[start]:
+        cell.fill = PatternFill("solid", fgColor="174B46")
+    for row, (label, explanation) in enumerate(notes, start + 1):
+        sheet.merge_cells(start_row=row, start_column=1, end_row=row, end_column=3)
+        sheet.merge_cells(start_row=row, start_column=4, end_row=row, end_column=len(SUMMARY_COLUMNS))
+        for column, value in ((1, label), (4, explanation)):
+            cell = sheet.cell(row, column, value)
+            cell.font = Font(name="Calibri", bold=column == 1, color="174B46" if column == 1 else "1F2937")
+            cell.alignment = Alignment(wrap_text=True, vertical="center")
+        sheet.row_dimensions[row].height = 42
+        for cell in sheet[row]:
+            cell.fill = PatternFill("solid", fgColor="F0F6F4" if row % 2 else "FFFFFF")
+    chosen_cell = sheet.cell(int(forest_index) + 2, 1)
+    chosen_cell.font = Font(name="Calibri", bold=True, color="166534")
+    chosen_cell.fill = PatternFill("solid", fgColor="DCFCE7")
 
 
 def export_report(models_dir: Path = MODELS_DIR) -> Path:
@@ -84,6 +139,8 @@ def export_report(models_dir: Path = MODELS_DIR) -> Path:
                         ColorScaleRule(start_type="min", start_color="FDE4DB",
                                        end_type="max", end_color="B7DDCD"),
                     )
+            if sheet_name == "Tong_hop":
+                add_model_selection_notes(sheet, frame)
         writer.book.properties.title = "Kết quả đánh giá mô hình khuyến nghị cây trồng"
     temporary_path.replace(report_path)
     return report_path

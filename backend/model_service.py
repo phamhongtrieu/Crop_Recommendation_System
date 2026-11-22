@@ -11,7 +11,7 @@ from backend.schemas import CropInput, CropProbability, CropResponse
 
 logger = logging.getLogger(__name__)
 FEATURE_NAMES = ("N", "P", "K", "temperature", "humidity", "ph", "rainfall")
-MODEL_PATH = Path(__file__).resolve().parents[1] / "models" / "softmax" / "model.joblib"
+MODEL_PATH = Path(__file__).resolve().parents[1] / "models" / "random_forest" / "model.joblib"
 
 
 class ModelUnavailableError(Exception):
