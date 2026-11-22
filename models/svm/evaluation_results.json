@@ -1,0 +1,169 @@
+{
+  "model_name": "SVM",
+  "evaluated_at": "2026-11-22T14:18:08+07:00",
+  "tables": {
+    "Tong_hop": [
+      {
+        "Model": "SVM",
+        "Configuration": "GridSearch",
+        "CV_accuracy_mean": 0.9846590909090909,
+        "CV_f1_macro_mean": 0.9846128008023415,
+        "CV_f1_macro_std": 0.004663340676607816,
+        "Test_accuracy": 0.990909090909091,
+        "Test_precision_macro": 0.991538764266037,
+        "Test_recall_macro": 0.9909090909090907,
+        "Test_f1_macro": 0.9908948561066659,
+        "Train_f1_macro": 0.9926091683905315,
+        "CV_train_validation_gap_F1": 0.008709013109908015,
+        "Preprocessing": "StandardScaler",
+        "Best_grid_parameters": "{\"svc__C\": 1, \"svc__gamma\": 1}"
+      }
+    ],
+    "GridSearch": [
+      {
+        "Model": "SVM",
+        "Candidate": 1,
+        "Parameters": "{\"svc__C\": 0.1, \"svc__gamma\": \"scale\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9352272727272727,
+        "CV_f1_macro_mean": 0.9333836724846186,
+        "CV_f1_macro_std": 0.006856151773038874
+      },
+      {
+        "Model": "SVM",
+        "Candidate": 2,
+        "Parameters": "{\"svc__C\": 0.1, \"svc__gamma\": 0.01}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.790340909090909,
+        "CV_f1_macro_mean": 0.7687196578179379,
+        "CV_f1_macro_std": 0.01848915095942827
+      },
+      {
+        "Model": "SVM",
+        "Candidate": 3,
+        "Parameters": "{\"svc__C\": 0.1, \"svc__gamma\": 0.1}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9107954545454546,
+        "CV_f1_macro_mean": 0.9071063808690123,
+        "CV_f1_macro_std": 0.004856865593645347
+      },
+      {
+        "Model": "SVM",
+        "Candidate": 4,
+        "Parameters": "{\"svc__C\": 0.1, \"svc__gamma\": 1}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9693181818181819,
+        "CV_f1_macro_mean": 0.9690437593286465,
+        "CV_f1_macro_std": 0.011588020171567692
+      },
+      {
+        "Model": "SVM",
+        "Candidate": 5,
+        "Parameters": "{\"svc__C\": 1, \"svc__gamma\": \"scale\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9789772727272726,
+        "CV_f1_macro_mean": 0.9788025126741349,
+        "CV_f1_macro_std": 0.0106237591310153
+      },
+      {
+        "Model": "SVM",
+        "Candidate": 6,
+        "Parameters": "{\"svc__C\": 1, \"svc__gamma\": 0.01}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9272727272727271,
+        "CV_f1_macro_mean": 0.925643854598342,
+        "CV_f1_macro_std": 0.005234063988285615
+      },
+      {
+        "Model": "SVM",
+        "Candidate": 7,
+        "Parameters": "{\"svc__C\": 1, \"svc__gamma\": 0.1}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9761363636363637,
+        "CV_f1_macro_mean": 0.9760447601770774,
+        "CV_f1_macro_std": 0.010135366078922833
+      },
+      {
+        "Model": "SVM",
+        "Candidate": 8,
+        "Parameters": "{\"svc__C\": 1, \"svc__gamma\": 1}",
+        "Selected": true,
+        "CV_accuracy_mean": 0.9846590909090909,
+        "CV_f1_macro_mean": 0.9846128008023415,
+        "CV_f1_macro_std": 0.004663340676607816
+      },
+      {
+        "Model": "SVM",
+        "Candidate": 9,
+        "Parameters": "{\"svc__C\": 10, \"svc__gamma\": \"scale\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9823863636363637,
+        "CV_f1_macro_mean": 0.9822118168978686,
+        "CV_f1_macro_std": 0.004895491688668094
+      },
+      {
+        "Model": "SVM",
+        "Candidate": 10,
+        "Parameters": "{\"svc__C\": 10, \"svc__gamma\": 0.01}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.978409090909091,
+        "CV_f1_macro_mean": 0.9780050695565817,
+        "CV_f1_macro_std": 0.009649779419752506
+      },
+      {
+        "Model": "SVM",
+        "Candidate": 11,
+        "Parameters": "{\"svc__C\": 10, \"svc__gamma\": 0.1}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9823863636363637,
+        "CV_f1_macro_mean": 0.9821239319043311,
+        "CV_f1_macro_std": 0.006489309668595289
+      },
+      {
+        "Model": "SVM",
+        "Candidate": 12,
+        "Parameters": "{\"svc__C\": 10, \"svc__gamma\": 1}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9829545454545455,
+        "CV_f1_macro_mean": 0.9828179050082175,
+        "CV_f1_macro_std": 0.0024847403688789435
+      },
+      {
+        "Model": "SVM",
+        "Candidate": 13,
+        "Parameters": "{\"svc__C\": 100, \"svc__gamma\": \"scale\"}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9818181818181818,
+        "CV_f1_macro_mean": 0.981683845757512,
+        "CV_f1_macro_std": 0.0029121905351459495
+      },
+      {
+        "Model": "SVM",
+        "Candidate": 14,
+        "Parameters": "{\"svc__C\": 100, \"svc__gamma\": 0.01}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9829545454545455,
+        "CV_f1_macro_mean": 0.9827110316307616,
+        "CV_f1_macro_std": 0.006505831134776262
+      },
+      {
+        "Model": "SVM",
+        "Candidate": 15,
+        "Parameters": "{\"svc__C\": 100, \"svc__gamma\": 0.1}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9829545454545453,
+        "CV_f1_macro_mean": 0.9827850757506184,
+        "CV_f1_macro_std": 0.0017002997823820428
+      },
+      {
+        "Model": "SVM",
+        "Candidate": 16,
+        "Parameters": "{\"svc__C\": 100, \"svc__gamma\": 1}",
+        "Selected": false,
+        "CV_accuracy_mean": 0.9818181818181818,
+        "CV_f1_macro_mean": 0.9816188727931425,
+        "CV_f1_macro_std": 0.004662936844988965
+      }
+    ]
+  }
+}
