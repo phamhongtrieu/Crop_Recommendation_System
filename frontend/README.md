@@ -91,7 +91,8 @@ kiểm tra trực quan giao diện trong trình duyệt.
   API vẫn dùng trường `probability`. Chú thích: “Giá trị do mô hình ước lượng,
   không phải tỷ lệ trồng thành công.”
 
-Bảng tên trong `CROP_NAMES` khớp 22 nhãn của `models/model_metadata.json`,
+Bảng tên trong `CROP_NAMES` khớp 22 nhãn của Random Forest trong
+[`models/random_forest/model_metadata.json`](../models/random_forest/model_metadata.json),
 bao gồm `mango` → Xoài. Hai nhãn dễ nhầm được đối chiếu theo Feedipedia:
 [black gram → Đậu mười](https://www.feedipedia.org/node/236),
 [moth bean → Đậu bướm](https://www.feedipedia.org/node/237).

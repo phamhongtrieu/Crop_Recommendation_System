@@ -40,7 +40,7 @@ def validate_inputs(values):
     return errors
 
 
-# Keys match the 22 classes in models/model_metadata.json (including mango).
+# Keys match the 22 classes in models/random_forest/model_metadata.json (including mango).
 CROP_NAMES = {
     "apple": ("Táo", "Apple", "🍎"),
     "banana": ("Chuối", "Banana", "🍌"),

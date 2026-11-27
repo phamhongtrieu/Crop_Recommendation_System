@@ -6,8 +6,8 @@
 Dataset gồm **2.200 mẫu, 22 loại cây**, mỗi loại 100 mẫu. Dữ liệu được chia có
 phân tầng theo nhãn: **1.760 mẫu train và 440 mẫu test**, `random_state=42`.
 
-Hiện đã huấn luyện **Softmax, Decision Tree, KNN, SVM và Random Forest**. Thư mục
-Naive Bayes đang để trống. Backend hiện sử dụng **Random Forest** tại
+Hiện đã huấn luyện **Softmax, Decision Tree, KNN, SVM và Random Forest**.
+Backend hiện sử dụng **Random Forest** tại
 `models/random_forest/model.joblib`.
 
 ## Cấu trúc thư mục
@@ -49,7 +49,6 @@ models/
     training_results.joblib
     model_metadata.json
     evaluation_results.json
-  naive_bayes/                      # Chỉ có .gitkeep
   svm/
     train.py
     evaluate.ipynb
